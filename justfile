@@ -113,6 +113,17 @@ dev-tui TARGET=".":
     @echo "🚀 Starting AuditHound TUI..."
     uv run audithound scan {{TARGET}}
 
+# Launch TUI with specific theme
+tui TARGET="." THEME="default":
+    @echo "🎨 Starting AuditHound TUI with {{THEME}} theme..."
+    uv run audithound tui {{TARGET}} --theme {{THEME}}
+
+# Test all available themes
+test-themes TARGET=".":
+    @echo "🎨 Testing all TUI themes..."
+    @echo "Available themes: default, dark, light, high_contrast, security"
+    @echo "Run: just tui {{TARGET}} <theme_name>"
+
 # Show AuditHound version
 version:
     @echo "📋 AuditHound version:"
@@ -238,8 +249,8 @@ security-scan:
     @echo "🔒 Running security scan on AuditHound itself..."
     just example audithound-self-test
     cp -r audithound/ audithound-self-test/
-    uv run audithound scan audithound-self-test/ --no-interactive --format html --output audithound-security-report.html
-    @echo "📄 Security report: audithound-security-report.html"
+    uv run audithound scan audithound-self-test/ --no-interactive --format json --output audithound-security-report.json
+    @echo "📄 Security report: audithound-security-report.json"
     rm -rf audithound-self-test/
 
 # Run specific scanner on target
@@ -255,9 +266,77 @@ watch-test:
 # Interactive development console
 console:
     @echo "🐍 Starting Python console with AuditHound loaded..."
-    uv run python -c "import audithound; from audithound.core import *; print('AuditHound loaded! Available: Config, SecurityScanner'); exec(open('/dev/tty').read())" -i
+    uv run python -c "import audithound; from audithound.core import *; from audithound.tui import *; print('AuditHound loaded! Available: Config, SecurityScanner, AuditHoundTUI'); exec(open('/dev/tty').read())" -i
 
 # Show help for specific command
 help COMMAND:
     @echo "📋 Help for {{COMMAND}}:"
     uv run audithound {{COMMAND}} --help
+
+# TUI-specific development commands
+# ================================
+
+# Test TUI with dark theme
+tui-dark TARGET=".":
+    @echo "🌙 Starting AuditHound TUI with dark theme..."
+    uv run audithound tui {{TARGET}} --theme dark
+
+# Test TUI with light theme
+tui-light TARGET=".":
+    @echo "☀️  Starting AuditHound TUI with light theme..."
+    uv run audithound tui {{TARGET}} --theme light
+
+# Test TUI with high contrast theme (accessibility)
+tui-accessible TARGET=".":
+    @echo "♿ Starting AuditHound TUI with high contrast theme..."
+    uv run audithound tui {{TARGET}} --theme high_contrast
+
+# Test TUI with security-focused theme
+tui-security TARGET=".":
+    @echo "🛡️  Starting AuditHound TUI with security theme..."
+    uv run audithound tui {{TARGET}} --theme security
+
+# Quick TUI demo with example vulnerable code
+demo:
+    @echo "🎬 Running AuditHound TUI demo..."
+    just example demo-code
+    uv run audithound tui demo-code --theme security
+    @echo "🧹 Cleaning up demo files..."
+    rm -rf demo-code
+
+# Test TUI state persistence (run multiple times to see session restore)
+test-persistence TARGET=".":
+    @echo "💾 Testing TUI session persistence..."
+    @echo "Run this command multiple times to test session restore"
+    uv run audithound tui {{TARGET}} --theme dark
+
+# Clean TUI cache and session data
+clean-tui:
+    @echo "🧹 Cleaning TUI cache and session data..."
+    rm -rf ~/.audithound/
+    @echo "✅ TUI data cleaned!"
+
+# Show TUI architecture overview
+tui-info:
+    @echo "🏗️  AuditHound TUI Architecture:"
+    @echo ""
+    @echo "📁 Core Components:"
+    @echo "  • State Management  - centralized event-driven state"
+    @echo "  • Component System  - reusable UI components"  
+    @echo "  • Theme Engine      - 5 built-in themes + custom support"
+    @echo "  • Service Layer     - scan execution & data persistence"
+    @echo ""
+    @echo "🎨 Available Themes:"
+    @echo "  • default          - balanced dark theme"
+    @echo "  • dark             - low-light optimized"
+    @echo "  • light            - high-light environments"
+    @echo "  • high_contrast    - accessibility focused"
+    @echo "  • security         - threat-focused visualization"
+    @echo ""
+    @echo "⌨️  Key Features:"
+    @echo "  • Command Palette   - Ctrl+Shift+P"
+    @echo "  • Real-time Updates - live scan progress"
+    @echo "  • Data Virtualization - handles large result sets" 
+    @echo "  • Session Persistence - automatic save/restore"
+    @echo ""
+    @echo "🚀 Usage: just tui <target> <theme>"
