@@ -336,6 +336,14 @@ class AuditScreen(BaseComponent):
         button_id = event.button.id
         self.logger.info(f"Audit screen button pressed: {button_id}")
         
+        # Check if this is an audit screen button and stop propagation if so
+        audit_buttons = {
+            "goto-checklist", "goto-setup", "goto-execute", "goto-checklist-from-execute", 
+            "goto-results", "save-audit-config", "load-template", "complete-all-checks",
+            "start-comprehensive-audit", "pause-audit", "stop-audit", "export-audit-reports",
+            "email-summary", "create-audit-package", "restart-audit"
+        }
+        
         # Navigation buttons
         if button_id == "goto-checklist":
             self._switch_to_tab("checklist")
@@ -375,6 +383,10 @@ class AuditScreen(BaseComponent):
             self._create_audit_package()
         elif button_id == "restart-audit":
             self._restart_audit()
+        
+        # Stop event propagation if this was an audit screen button
+        if button_id in audit_buttons:
+            event.stop()
         
     def on_checkbox_changed(self, event: Checkbox.Changed) -> None:
         """Handle checklist checkbox changes."""
@@ -619,7 +631,7 @@ class AuditScreen(BaseComponent):
         except Exception as e:
             self.logger.error(f"Error completing checklist: {e}")
     
-    async def _start_comprehensive_audit(self) -> None:
+    def _start_comprehensive_audit(self) -> None:
         """Start the comprehensive audit process."""
         self.logger.info("Starting comprehensive audit")
         
@@ -660,7 +672,7 @@ class AuditScreen(BaseComponent):
                 ))
                 
                 # Simulate audit execution (replace with actual audit call)
-                await self._execute_framework_audit(framework, scanners)
+                self._execute_framework_audit(framework, scanners)
                 
                 completed_audits += 1
                 progress_percent = (completed_audits / total_audits) * 100
@@ -684,19 +696,19 @@ class AuditScreen(BaseComponent):
             self.logger.error(f"Error during comprehensive audit: {e}")
             self.app.notify(f"Audit failed: {e}", severity="error")
     
-    async def _execute_framework_audit(self, framework: str, scanners: List[str]) -> None:
+    def _execute_framework_audit(self, framework: str, scanners: List[str]) -> None:
         """Execute audit for a specific framework."""
         self.logger.info(f"Executing {framework} audit with scanners: {scanners}")
         
         # Simulate audit execution with delay
-        await asyncio.sleep(2)  # Replace with actual audit execution
+        import time
+        time.sleep(1)  # Replace with actual audit execution
         
         # Update logs
         try:
             logs_widget = self.query_one("#audit-logs", Static)
-            current_logs = logs_widget.renderable or ""
-            new_log = f"✅ {framework.upper()} audit completed with {len(scanners)} scanners\n"
-            logs_widget.update(str(current_logs) + new_log)
+            new_log = f"✅ {framework.upper()} audit completed with {len(scanners)} scanners"
+            logs_widget.update(Panel(new_log, title="Audit Logs", border_style="green"))
         except Exception as e:
             self.logger.debug(f"Error updating logs: {e}")
     
