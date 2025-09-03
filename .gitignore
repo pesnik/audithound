@@ -134,6 +134,8 @@ audithound_results.*
 *.log
 test_production_tui.py
 PRODUCTION_TUI_SUMMARY.md
+audit-*/
+test_tui_audit.py
 
 # IDE files
 .vscode/
