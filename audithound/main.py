@@ -5,7 +5,7 @@ from rich.console import Console
 from pathlib import Path
 from typing import Optional, List
 
-from .tui.app_v2 import ProductionTUI
+from .tui.app import AuditHoundTUI
 from .core.scanner import SecurityScanner
 from .core.config import Config
 
@@ -54,9 +54,9 @@ def scan(
                     scanner_config.severity_threshold = severity
         
         if interactive:
-            # Launch Production TUI application
-            console.print("🚀 Launching AuditHound Production TUI...")
-            tui_app = ProductionTUI(
+            # Launch TUI application
+            console.print("🚀 Launching AuditHound TUI...")
+            tui_app = AuditHoundTUI(
                 target=target,
                 config=config,
                 config_file=config_file,
@@ -189,8 +189,8 @@ def tui(
         # Load configuration
         config = Config.load(config_file)
         
-        console.print(f"🚀 Launching AuditHound Production TUI with {theme} theme...")
-        tui_app = ProductionTUI(
+        console.print(f"🚀 Launching AuditHound TUI with {theme} theme...")
+        tui_app = AuditHoundTUI(
             target=target,
             config=config,
             config_file=config_file,
