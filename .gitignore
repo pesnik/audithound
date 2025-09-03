@@ -154,3 +154,5 @@ Thumbs.db
 # UV Python manager
 .venv/
 uv.lock
+
+.claude 

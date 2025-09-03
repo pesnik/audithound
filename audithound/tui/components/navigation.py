@@ -3,6 +3,7 @@
 import asyncio
 from datetime import datetime
 from typing import Dict, List, Optional, Callable, Any, Tuple
+import time
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
@@ -68,11 +69,19 @@ class NavigationBar(BaseComponent):
             self._update_breadcrumbs()
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle quick action button presses."""
+        """Handle button presses."""
         button_id = event.button.id
         if button_id and button_id.startswith("action-"):
             action_key = button_id.replace("action-", "")
             self._execute_quick_action(action_key)
+        elif button_id and button_id.startswith("breadcrumb-"):
+            # Extract target from ID format: breadcrumb-{target}-{i}-{timestamp}
+            parts = button_id.replace("breadcrumb-", "").split("-")
+            if len(parts) >= 3:
+                target = "-".join(parts[:-2])  # Everything except index and timestamp
+            else:
+                target = parts[0]  # Fallback for simpler format
+            self._navigate_to_breadcrumb(target)
     
     def _on_tab_changed(self, event: Event) -> None:
         """Handle tab changes."""
@@ -130,7 +139,13 @@ class NavigationBar(BaseComponent):
         """Refresh the breadcrumbs display."""
         try:
             container = self.query_one("#breadcrumbs-container", Horizontal)
-            container.remove_children()
+            
+            # Force remove all children and wait
+            for child in list(container.children):
+                child.remove()
+            
+            # Use timestamp to ensure unique IDs
+            timestamp = int(time.time() * 1000000)  # microseconds for uniqueness
             
             for i, crumb in enumerate(self.breadcrumbs):
                 if i > 0:
@@ -140,7 +155,7 @@ class NavigationBar(BaseComponent):
                     Button(
                         crumb["label"],
                         variant="default",
-                        id=f"breadcrumb-{crumb['target']}",
+                        id=f"breadcrumb-{crumb['target']}-{i}-{timestamp}",
                         classes="breadcrumb-item"
                     )
                 )
@@ -175,6 +190,11 @@ class NavigationBar(BaseComponent):
         """Quick help action."""
         # Would show help modal or switch to help tab
         pass
+
+    def _navigate_to_breadcrumb(self, target: str) -> None:
+        """Navigate to breadcrumb target."""
+        from ..state.actions import change_tab_action
+        self.dispatch_action(change_tab_action(target))
 
 
 class CommandPalette(ModalScreen):

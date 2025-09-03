@@ -41,7 +41,9 @@ class ThemeManager:
     def _on_theme_changed(self, event: Event) -> None:
         """Handle theme change events."""
         theme_name = event.get_payload_value("theme")
-        if theme_name and theme_name != self.get_current_theme_name():
+        current_name = self.get_current_theme_name()
+        # Avoid circular updates - only set if different
+        if theme_name and theme_name.lower() != current_name.lower():
             self.set_theme(theme_name)
     
     def _on_config_changed(self, event: Event) -> None:
@@ -298,12 +300,15 @@ class ThemeManager:
     
     def _save_theme_preference(self, theme_name: str) -> None:
         """Save theme preference to application state."""
-        # This would typically save to user config
-        # For now, just dispatch action to update state
-        from ..state.actions import change_theme_action
-        action = change_theme_action(theme_name)
-        # Don't dispatch to avoid circular updates
-        # self.store.dispatch_action(action)
+        # Update the state to reflect the theme change
+        try:
+            from ..state.actions import change_theme_action
+            action = change_theme_action(theme_name)
+            # Dispatch the action to update application state
+            self.store.dispatch_action(action)
+            self.logger.debug(f"Theme preference saved: {theme_name}")
+        except Exception as e:
+            self.logger.error(f"Failed to save theme preference: {e}")
     
     def get_theme_preferences_path(self) -> Path:
         """Get path to theme preferences file."""

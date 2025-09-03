@@ -38,28 +38,29 @@ class ConfigurationScreen(BaseComponent):
             with TabbedContent(initial="scanners", id="config-tabs"):
                 # Scanner Configuration
                 with TabPane("🔍 Scanners", id="scanners"):
-                    yield Static("Scanner configuration - implementation in progress")
+                    yield self._create_scanner_config()
                 
                 # Target Configuration
                 with TabPane("🎯 Targets", id="targets"):
-                    yield Static("Target configuration - implementation in progress")
+                    yield self._create_target_config()
                 
                 # Output Configuration
                 with TabPane("📤 Output", id="output"):
-                    yield Static("Output configuration - implementation in progress")
+                    yield self._create_output_config()
                 
                 # Environment Configuration
                 with TabPane("🐳 Environment", id="environment"):
-                    yield Static("Environment configuration - implementation in progress")
+                    yield self._create_environment_config()
                 
                 # Themes Configuration
                 with TabPane("🎨 Themes", id="themes"):
-                    yield Static("Theme configuration - implementation in progress")
+                    yield self._create_theme_config()
     
     def _setup_event_listeners(self) -> None:
         """Setup configuration event listeners."""
         self.listen_to_event(EventType.CONFIG_CHANGED, self._on_config_changed)
-        self.listen_to_event(EventType.THEME_CHANGED, self._on_theme_changed)
+        # Disabled theme listener to prevent recursion
+        # self.listen_to_event(EventType.THEME_CHANGED, self._on_theme_changed)
     
     def on_component_mounted(self) -> None:
         """Initialize configuration screen."""
@@ -108,111 +109,118 @@ class ConfigurationScreen(BaseComponent):
     
     def _create_scanner_config(self) -> Vertical:
         """Create scanner configuration section."""
-        container = Vertical()
-        
-        # Scanner enable/disable controls
-        container.mount(Static("Scanner Configuration", classes="section-title"))
-        
         # Get current config
         config = self.store.get_state().config
         
+        children = [Static("Scanner Configuration", classes="section-title")]
+        
         if hasattr(config, 'scanners'):
             for scanner_name, scanner_config in config.scanners.items():
-                with container:
-                    with Collapsible(collapsed=False, title=f"🔍 {scanner_name.title()}"):
-                        with Vertical():
-                            with Horizontal():
-                                yield Static(f"Enable {scanner_name}:")
-                                yield Switch(
-                                    value=getattr(scanner_config, 'enabled', True),
-                                    id=f"scanner-{scanner_name}-enabled"
-                                )
-                            
-                            with Horizontal():
-                                yield Static("Severity Threshold:")
-                                yield Select(
-                                    [
-                                        ("Low", "low"),
-                                        ("Medium", "medium"), 
-                                        ("High", "high"),
-                                        ("Critical", "critical")
-                                    ],
-                                    value=getattr(scanner_config, 'severity_threshold', 'low'),
-                                    id=f"scanner-{scanner_name}-threshold"
-                                )
-                            
-                            # Scanner-specific options
-                            if scanner_name == "bandit":
-                                yield Input(
-                                    placeholder="Additional Bandit options...",
-                                    id=f"scanner-{scanner_name}-options"
-                                )
-                            elif scanner_name == "semgrep":
-                                yield Input(
-                                    placeholder="Semgrep ruleset...",
-                                    id=f"scanner-{scanner_name}-ruleset"
-                                )
+                scanner_children = [
+                    Horizontal(
+                        Static(f"Enable {scanner_name}:"),
+                        Switch(
+                            value=getattr(scanner_config, 'enabled', True),
+                            id=f"scanner-{scanner_name}-enabled"
+                        )
+                    ),
+                    Horizontal(
+                        Static("Severity Threshold:"),
+                        Select(
+                            [
+                                ("Low", "low"),
+                                ("Medium", "medium"), 
+                                ("High", "high"),
+                                ("Critical", "critical")
+                            ],
+                            value=getattr(scanner_config, 'severity_threshold', 'low'),
+                            id=f"scanner-{scanner_name}-threshold"
+                        )
+                    )
+                ]
+                
+                # Scanner-specific options
+                if scanner_name == "bandit":
+                    scanner_children.append(
+                        Input(
+                            placeholder="Additional Bandit options...",
+                            id=f"scanner-{scanner_name}-options"
+                        )
+                    )
+                elif scanner_name == "semgrep":
+                    scanner_children.append(
+                        Input(
+                            placeholder="Semgrep ruleset...",
+                            id=f"scanner-{scanner_name}-ruleset"
+                        )
+                    )
+                
+                children.append(
+                    Collapsible(
+                        Vertical(*scanner_children),
+                        collapsed=False, 
+                        title=f"🔍 {scanner_name.title()}"
+                    )
+                )
+        else:
+            children.append(Static("No scanners configured", classes="no-config"))
         
-        return container
+        return Vertical(*children)
     
     def _create_target_config(self) -> Vertical:
         """Create target configuration section."""
-        container = Vertical()
-        
-        container.mount(Static("Target Configuration", classes="section-title"))
-        
         config = self.store.get_state().config
         
-        with container:
+        return Vertical(
+            Static("Target Configuration", classes="section-title"),
             # Target path
-            with Horizontal():
-                yield Static("Default Target Path:")
-                yield Input(
+            Horizontal(
+                Static("Default Target Path:"),
+                Input(
                     value=getattr(config, 'default_target', ''),
                     placeholder="/path/to/scan/target",
                     id="default-target-path"
                 )
-            
+            ),
             # Include/exclude patterns
-            with Collapsible(collapsed=False, title="📁 File Patterns"):
-                with Vertical():
-                    yield Static("Include Patterns:")
-                    yield Input(
+            Collapsible(
+                Vertical(
+                    Static("Include Patterns:"),
+                    Input(
                         value=",".join(getattr(config, 'include_patterns', [])),
                         placeholder="*.py,*.js,*.go",
                         id="include-patterns"
-                    )
-                    
-                    yield Static("Exclude Patterns:")
-                    yield Input(
+                    ),
+                    Static("Exclude Patterns:"),
+                    Input(
                         value=",".join(getattr(config, 'exclude_patterns', [])),
                         placeholder="node_modules,*.test.py",
                         id="exclude-patterns"
-                    )
-                    
-                    with Horizontal():
-                        yield Static("Include Hidden Files:")
-                        yield Switch(
+                    ),
+                    Horizontal(
+                        Static("Include Hidden Files:"),
+                        Switch(
                             value=getattr(config, 'include_hidden', False),
                             id="include-hidden-files"
                         )
-        
-        return container
+                    )
+                ),
+                collapsed=False, 
+                title="📁 File Patterns"
+            )
+        )
     
     def _create_output_config(self) -> Vertical:
         """Create output configuration section."""
-        container = Vertical()
-        
-        container.mount(Static("Output Configuration", classes="section-title"))
-        
         config = self.store.get_state().config
         output_config = getattr(config, 'output', None)
         
-        with container:
+        return Vertical(
+            Static("Output Configuration", classes="section-title"),
             # Output format
-            with Horizontal():
-                yield Static("Default Output Format:")
-                yield Select(
+            Horizontal(
+                Static("Default Output Format:"),
+                Select(
                     [
                         ("JSON", "json"),
                         ("YAML", "yaml"),
@@ -223,133 +231,133 @@ class ConfigurationScreen(BaseComponent):
                     value=getattr(output_config, 'format', 'json') if output_config else 'json',
                     id="output-format"
                 )
-            
+            ),
             # Output file
-            with Horizontal():
-                yield Static("Default Output File:")
-                yield Input(
+            Horizontal(
+                Static("Default Output File:"),
+                Input(
                     value=getattr(output_config, 'file', '') if output_config else '',
                     placeholder="audithound-results.json",
                     id="output-file"
                 )
-            
+            ),
             # Output options
-            with Collapsible(collapsed=False, title="📄 Output Options"):
-                with Vertical():
-                    yield Checkbox(
+            Collapsible(
+                Vertical(
+                    Checkbox(
                         "Include Passed Tests",
                         value=getattr(output_config, 'include_passed', False) if output_config else False,
                         id="include-passed"
-                    )
-                    
-                    yield Checkbox(
+                    ),
+                    Checkbox(
                         "Group by Severity",
                         value=getattr(output_config, 'group_by_severity', True) if output_config else True,
                         id="group-by-severity"
-                    )
-                    
-                    yield Checkbox(
+                    ),
+                    Checkbox(
                         "Include Metadata",
                         value=getattr(output_config, 'include_metadata', True) if output_config else True,
                         id="include-metadata"
-                    )
-                    
-                    yield Checkbox(
+                    ),
+                    Checkbox(
                         "Pretty Print",
                         value=getattr(output_config, 'pretty_print', True) if output_config else True,
                         id="pretty-print"
                     )
-        
-        return container
+                ),
+                collapsed=False, 
+                title="📄 Output Options"
+            )
+        )
     
     def _create_environment_config(self) -> Vertical:
         """Create environment configuration section."""
-        container = Vertical()
-        
-        container.mount(Static("Environment Configuration", classes="section-title"))
-        
         config = self.store.get_state().config
         
-        with container:
+        return Vertical(
+            Static("Environment Configuration", classes="section-title"),
             # Docker settings
-            with Collapsible(collapsed=False, title="🐳 Docker Settings"):
-                with Vertical():
-                    with Horizontal():
-                        yield Static("Use Docker:")
-                        yield Switch(
+            Collapsible(
+                Vertical(
+                    Horizontal(
+                        Static("Use Docker:"),
+                        Switch(
                             value=getattr(config, 'use_docker', False),
                             id="use-docker"
                         )
-                    
-                    with Horizontal():
-                        yield Static("Docker Timeout (seconds):")
-                        yield Input(
+                    ),
+                    Horizontal(
+                        Static("Docker Timeout (seconds):"),
+                        Input(
                             value=str(getattr(config, 'docker_timeout', 300)),
                             placeholder="300",
                             id="docker-timeout"
                         )
-                    
-                    yield Input(
+                    ),
+                    Input(
                         value=getattr(config, 'docker_image', ''),
                         placeholder="Custom docker image (optional)",
                         id="docker-image"
                     )
-            
+                ),
+                collapsed=False, 
+                title="🐳 Docker Settings"
+            ),
             # Performance settings
-            with Collapsible(collapsed=False, title="⚡ Performance"):
-                with Vertical():
-                    with Horizontal():
-                        yield Static("Max Concurrent Scanners:")
-                        yield Input(
+            Collapsible(
+                Vertical(
+                    Horizontal(
+                        Static("Max Concurrent Scanners:"),
+                        Input(
                             value=str(getattr(config, 'max_concurrent', 3)),
                             placeholder="3",
                             id="max-concurrent"
                         )
-                    
-                    with Horizontal():
-                        yield Static("Enable Caching:")
-                        yield Switch(
+                    ),
+                    Horizontal(
+                        Static("Enable Caching:"),
+                        Switch(
                             value=getattr(config, 'enable_cache', True),
                             id="enable-cache"
                         )
-        
-        return container
+                    )
+                ),
+                collapsed=False, 
+                title="⚡ Performance"
+            )
+        )
     
     def _create_theme_config(self) -> Vertical:
         """Create theme configuration section."""
-        container = Vertical()
+        current_theme = getattr(self.store.get_state(), 'theme', 'default')
         
-        container.mount(Static("Theme Configuration", classes="section-title"))
-        
-        current_theme = self.store.get_state().theme
-        
-        with container:
+        return Vertical(
+            Static("Theme Configuration", classes="section-title"),
             # Theme selection
-            with Horizontal():
-                yield Static("Current Theme:")
-                yield Select(
+            Horizontal(
+                Static("Current Theme:"),
+                Select(
                     [
-                        ("Default", "default"),
-                        ("Dark", "dark"),
-                        ("Light", "light"),
-                        ("High Contrast", "high_contrast"),
-                        ("Security", "security")
+                        ("Textual Dark", "textual-dark"),
+                        ("Textual Light", "textual-light")
                     ],
-                    value=current_theme,
+                    value=current_theme if current_theme in ["textual-dark", "textual-light"] else "textual-dark",
                     id="theme-select"
                 )
-            
+            ),
             # Theme preview
-            yield Static("Theme preview area", id="theme-preview", classes="theme-preview")
-            
+            Static("Theme preview area", id="theme-preview", classes="theme-preview"),
             # Theme options
-            with Collapsible(collapsed=True, title="🎨 Advanced Theme Options"):
-                with Vertical():
-                    yield Button("Create Custom Theme", variant="primary", id="create-theme")
-                    yield Button("Import Theme", variant="default", id="import-theme")
-                    yield Button("Export Current Theme", variant="default", id="export-theme")
-        
-        return container
+            Collapsible(
+                Vertical(
+                    Button("Create Custom Theme", variant="primary", id="create-theme"),
+                    Button("Import Theme", variant="default", id="import-theme"),
+                    Button("Export Current Theme", variant="default", id="export-theme")
+                ),
+                collapsed=True, 
+                title="🎨 Advanced Theme Options"
+            )
+        )
     
     def _on_config_changed(self, event) -> None:
         """Handle config change events."""
@@ -358,11 +366,13 @@ class ConfigurationScreen(BaseComponent):
     def _on_theme_changed(self, event) -> None:
         """Handle theme change events."""
         new_theme = event.get_payload_value("theme")
-        try:
-            theme_select = self.query_one("#theme-select", Select)
-            theme_select.value = new_theme
-        except Exception as e:
-            self.logger.debug(f"Error updating theme select: {e}")
+        # Temporarily disable to prevent recursion
+        self.logger.debug(f"Theme change event received: {new_theme} (handling disabled to prevent recursion)")
+        # try:
+        #     theme_select = self.query_one("#theme-select", Select)
+        #     theme_select.value = new_theme
+        # except Exception as e:
+        #     self.logger.debug(f"Error updating theme select: {e}")
     
     def _load_current_config(self) -> None:
         """Load current configuration into UI elements."""

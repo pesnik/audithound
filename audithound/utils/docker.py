@@ -1,5 +1,6 @@
 """Docker utility for running security scanners in containers."""
 
+import logging
 import subprocess
 import docker
 from pathlib import Path
@@ -12,14 +13,17 @@ class DockerRunner:
     def __init__(self, timeout: int = 300):
         self.timeout = timeout
         self.client = None
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._check_docker_availability()
     
     def _check_docker_availability(self) -> None:
         """Check if Docker is available and accessible."""
         try:
             self.client = docker.from_env()
+            self.logger.debug("Docker client initialized successfully")
             self.client.ping()
-        except Exception:
+        except Exception as e:
+            self.logger.warning(f"Docker not available: {e}")
             self.client = None
     
     def is_available(self) -> bool:
@@ -68,6 +72,9 @@ class DockerRunner:
             # Update command to work within container
             container_cmd = self._adapt_command_for_container(cmd)
             
+            self.logger.debug(f"Running Docker container: {image}")
+            self.logger.debug(f"Command: {container_cmd}")
+            
             # Run container
             container = self.client.containers.run(
                 image=image,
@@ -99,12 +106,16 @@ class DockerRunner:
         except docker.errors.ContainerError as e:
             # Container ran but exited with non-zero code
             output = e.container.logs().decode('utf-8', errors='replace')
+            self.logger.error(f"Docker container exited with code {e.exit_status}")
+            self.logger.debug(f"Container output: {output}")
             raise subprocess.CalledProcessError(e.exit_status, cmd, output)
         
         except docker.errors.ImageNotFound:
+            self.logger.error(f"Docker image not found: {image}")
             raise RuntimeError(f"Docker image not found: {image}")
         
         except Exception as e:
+            self.logger.error(f"Docker execution failed: {e}")
             raise RuntimeError(f"Docker execution failed: {str(e)}")
     
     def _ensure_image_available(self, image: str) -> None:

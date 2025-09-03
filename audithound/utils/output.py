@@ -2,6 +2,7 @@
 
 import json
 import csv
+import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
@@ -24,10 +25,14 @@ class OutputFormatter:
     def __init__(self, config: OutputConfig):
         self.config = config
         self.console = Console()
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
     
     def format(self, results: AggregatedResults) -> str:
         """Format results according to configuration."""
-        if self.config.format.lower() == 'json':
+        format_type = self.config.format.lower()
+        self.logger.debug(f"Formatting results as {format_type}")
+        
+        if format_type == 'json':
             return self._format_json(results)
         elif self.config.format.lower() == 'csv':
             return self._format_csv(results)

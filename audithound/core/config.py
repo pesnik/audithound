@@ -1,5 +1,6 @@
 """Configuration management for AuditHound."""
 
+import logging
 import os
 import yaml
 from pathlib import Path
@@ -47,11 +48,23 @@ class Config:
     @classmethod
     def load(cls, config_file: Optional[Path] = None) -> "Config":
         """Load configuration from file or create default."""
+        logger = logging.getLogger(f"{__name__}.Config")
+        
         if config_file and config_file.exists():
-            with open(config_file, 'r') as f:
-                data = yaml.safe_load(f)
-                return cls.from_dict(data)
+            logger.info(f"Loading configuration from {config_file}")
+            try:
+                with open(config_file, 'r') as f:
+                    data = yaml.safe_load(f)
+                    return cls.from_dict(data)
+            except Exception as e:
+                logger.error(f"Failed to load config from {config_file}: {e}")
+                logger.info("Falling back to default configuration")
+                return cls.default()
         else:
+            if config_file:
+                logger.info(f"Config file {config_file} not found, using defaults")
+            else:
+                logger.info("No config file specified, using defaults")
             return cls.default()
     
     @classmethod
@@ -139,9 +152,17 @@ class Config:
     
     def save(self, path: Path) -> None:
         """Save configuration to file."""
-        data = self.to_dict()
-        with open(path, 'w') as f:
-            yaml.dump(data, f, default_flow_style=False, indent=2)
+        logger = logging.getLogger(f"{__name__}.Config")
+        logger.info(f"Saving configuration to {path}")
+        
+        try:
+            data = self.to_dict()
+            with open(path, 'w') as f:
+                yaml.dump(data, f, default_flow_style=False, indent=2)
+            logger.debug(f"Configuration saved successfully to {path}")
+        except Exception as e:
+            logger.error(f"Failed to save configuration to {path}: {e}")
+            raise
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""

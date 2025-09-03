@@ -105,7 +105,7 @@ example OUTPUT="./test-example":
 # Run AuditHound scan on example code
 scan-example EXAMPLE_DIR="./test-example":
     @echo "🔍 Scanning example code..."
-    uv run audithound scan {{EXAMPLE_DIR}} --no-interactive --format json --output example-results.json
+    uv run audithound scan {{EXAMPLE_DIR}} --no-interactive --no-docker --format json --output example-results.json
     @echo "📄 Results saved to example-results.json"
 
 # Start interactive TUI for development testing
@@ -163,13 +163,19 @@ show-config:
 # Run a quick development scan (headless, JSON output)
 dev-scan TARGET="." OUTPUT="dev-results.json":
     @echo "🔍 Running development scan..."
-    uv run audithound scan {{TARGET}} --no-interactive --format json --output {{OUTPUT}}
+    uv run audithound scan {{TARGET}} --no-interactive --no-docker --format json --output {{OUTPUT}}
+    @echo "📄 Results saved to {{OUTPUT}}"
+
+# Run a development scan with Docker
+dev-scan-docker TARGET="." OUTPUT="dev-results.json":
+    @echo "🐳 Running development scan with Docker..."
+    uv run audithound scan {{TARGET}} --no-interactive --docker --format json --output {{OUTPUT}}
     @echo "📄 Results saved to {{OUTPUT}}"
 
 # Run security scan with specific tools only
 scan-tools TARGET="." TOOLS="bandit,safety":
     @echo "🔍 Running scan with tools: {{TOOLS}}"
-    uv run audithound scan {{TARGET}} --tools {{TOOLS}} --no-interactive
+    uv run audithound scan {{TARGET}} --tools {{TOOLS}} --no-interactive --no-docker
 
 # Export results to different formats
 export-results INPUT="results.json" FORMAT="html":
@@ -249,14 +255,19 @@ security-scan:
     @echo "🔒 Running security scan on AuditHound itself..."
     just example audithound-self-test
     cp -r audithound/ audithound-self-test/
-    uv run audithound scan audithound-self-test/ --no-interactive --format json --output audithound-security-report.json
+    uv run audithound scan audithound-self-test/ --no-interactive --no-docker --format json --output audithound-security-report.json
     @echo "📄 Security report: audithound-security-report.json"
     rm -rf audithound-self-test/
 
 # Run specific scanner on target
 run-scanner SCANNER="bandit" TARGET=".":
     @echo "🔍 Running {{SCANNER}} on {{TARGET}}..."
-    uv run audithound scan {{TARGET}} --tools {{SCANNER}} --no-interactive
+    uv run audithound scan {{TARGET}} --tools {{SCANNER}} --no-interactive --no-docker
+
+# Run specific scanner on target with Docker
+run-scanner-docker SCANNER="bandit" TARGET=".":
+    @echo "🐳 Running {{SCANNER}} on {{TARGET}} with Docker..."
+    uv run audithound scan {{TARGET}} --tools {{SCANNER}} --no-interactive --docker
 
 # Watch for changes and run tests automatically (requires entr)
 watch-test:
@@ -272,6 +283,34 @@ console:
 help COMMAND:
     @echo "📋 Help for {{COMMAND}}:"
     uv run audithound {{COMMAND}} --help
+
+# Log management commands
+# ======================
+
+# View recent logs
+logs:
+    @echo "📋 Recent AuditHound logs:"
+    uv run audithound logs
+
+# Follow logs in real-time
+logs-follow:
+    @echo "📋 Following AuditHound logs (Ctrl+C to stop):"
+    uv run audithound logs --follow
+
+# View error logs only
+logs-errors:
+    @echo "🚨 Error logs only:"
+    uv run audithound logs --level ERROR
+
+# Clear log files
+logs-clear:
+    @echo "🗑️  Clearing log files:"
+    uv run audithound logs --clear
+
+# Show log file location and stats
+logs-info:
+    @echo "📋 Log file information:"
+    uv run audithound logs --tail 0
 
 # TUI-specific development commands
 # ================================

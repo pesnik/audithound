@@ -34,15 +34,19 @@ class AuditHoundTUI(App):
     
     # Global keyboard bindings
     BINDINGS = [
-        Binding("ctrl+q", "quit", "Quit", priority=True),
+        Binding("q", "quit", "Quit", priority=True),
+        Binding("escape", "quit", "Quit", priority=True),
+        Binding("ctrl+c", "quit", "Quit", priority=True),
+        Binding("cmd+q", "quit", "Quit", priority=True),
+        Binding("cmd+shift+p", "command_palette", "Command Palette", priority=True),
         Binding("ctrl+shift+p", "command_palette", "Command Palette", priority=True),
         Binding("f1", "help", "Help", priority=True),
-        Binding("ctrl+1", "focus_dashboard", "Dashboard"),
-        Binding("ctrl+2", "focus_results", "Results"),
-        Binding("ctrl+3", "focus_configuration", "Configuration"),
+        Binding("1", "focus_dashboard", "Dashboard"),
+        Binding("2", "focus_results", "Results"), 
+        Binding("3", "focus_configuration", "Configuration"),
         Binding("f5", "start_scan", "Start Scan"),
-        Binding("ctrl+shift+t", "toggle_theme", "Toggle Theme"),
-        Binding("ctrl+e", "export_results", "Export Results"),
+        Binding("t", "toggle_theme", "Toggle Theme"),
+        Binding("e", "export_results", "Export Results"),
     ]
     
     def __init__(
@@ -79,10 +83,9 @@ class AuditHoundTUI(App):
         self.scanner_service = ScanService(self.store, self.config)
         self.persistence_service = PersistenceService(self.store)
         
-        # Initialize theme management
+        # Initialize theme management (minimal setup to prevent crashes)
         self.theme_manager = ThemeManager(self.store)
-        self.theme_manager.set_theme(theme)
-        self.theme_manager.register_theme_callback(self._on_theme_changed)
+        # Don't set theme or register callbacks to prevent recursion
         
         # Initialize keyboard shortcuts
         self.shortcut_manager = KeyboardShortcutManager(self)
@@ -98,8 +101,39 @@ class AuditHoundTUI(App):
     
     def compose(self) -> ComposeResult:
         """Create the main TUI layout."""
-        # Apply current theme CSS
-        self.CSS = self.theme_manager.get_theme_css()
+        # Add basic theme CSS
+        self.CSS = """
+        /* Dark theme (default) */
+        .dark-theme {
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+        
+        /* Light theme */
+        .light-theme {
+            background: #ffffff;
+            color: #000000;
+        }
+        
+        .light-theme Header {
+            background: #f0f0f0;
+            color: #000000;
+        }
+        
+        .light-theme Footer {
+            background: #f0f0f0;
+            color: #000000;
+        }
+        
+        .light-theme Button {
+            background: #e0e0e0;
+            color: #000000;
+        }
+        
+        .light-theme Static {
+            color: #000000;
+        }
+        """
         
         yield Header(show_clock=True)
         
@@ -133,6 +167,9 @@ class AuditHoundTUI(App):
         # Set app metadata
         self.title = "AuditHound - Security Audit Scanner"
         self.sub_title = f"Target: {self.target}"
+        
+        # Set initial theme class (now that screen stack exists)
+        self.add_class("dark-theme")
         
         # Setup state event listeners
         self._setup_event_listeners()
@@ -240,20 +277,21 @@ class AuditHoundTUI(App):
         old_tab = event.get_payload_value("old_tab")
         
         self.logger.debug(f"Tab changed from {old_tab} to {new_tab}")
+        
+        # Update the actual UI tab
+        try:
+            tabs = self.query_one("#main-tabs", TabbedContent)
+            if tabs.active != new_tab:
+                tabs.active = new_tab
+        except Exception as e:
+            self.logger.error(f"Error updating UI tab to {new_tab}: {e}")
     
     def _on_theme_changed(self, new_theme) -> None:
-        """Handle theme changes."""
-        self.logger.info(f"Theme changed to: {new_theme.name}")
-        
-        # Apply new CSS
-        self.CSS = new_theme.get_css()
-        self.refresh_css()
-        
-        self.notify(
-            f"Theme changed to {new_theme.name}",
-            title="Theme Updated",
-            timeout=3
-        )
+        """Handle theme changes from the theme manager (legacy)."""
+        # This is now handled directly in action_toggle_theme
+        # Keep for compatibility but log that it's being bypassed
+        self.logger.debug(f"Legacy theme change callback triggered: {new_theme.name}")
+        pass
     
     # Action handlers
     
@@ -290,10 +328,26 @@ class AuditHoundTUI(App):
         self.store.dispatch_action(start_scan_action(target, tools))
     
     def action_toggle_theme(self) -> None:
-        """Toggle between light and dark themes."""
-        current_theme = self.store.get_state_value("theme", "default")
-        new_theme = "light" if current_theme == "dark" else "dark"
-        self.theme_manager.set_theme(new_theme)
+        """Toggle between themes using CSS classes."""
+        self.logger.info("THEME TOGGLE ACTION CALLED!")
+        
+        # Use CSS classes instead of Textual's theme system
+        try:
+            if self.has_class("light-theme"):
+                self.remove_class("light-theme")
+                self.add_class("dark-theme")
+                self.logger.info("Switched to dark theme")
+                self.notify("Switched to Dark Theme", timeout=2)
+            else:
+                self.remove_class("dark-theme")
+                self.add_class("light-theme") 
+                self.logger.info("Switched to light theme")
+                self.notify("Switched to Light Theme", timeout=2)
+                
+        except Exception as e:
+            self.logger.error(f"CSS class theme change failed: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
     
     def action_export_results(self) -> None:
         """Export current results."""
@@ -332,10 +386,10 @@ class AuditHoundTUI(App):
         try:
             tabs = self.query_one("#main-tabs", TabbedContent)
             old_tab = tabs.active
-            tabs.active = tab_id
             
-            # Dispatch tab change action
+            # Only change if different and dispatch state update
             if old_tab != tab_id:
+                tabs.active = tab_id
                 self.store.dispatch_action(change_tab_action(tab_id))
         
         except Exception as e:
@@ -357,14 +411,11 @@ class AuditHoundTUI(App):
     
     # Utility methods
     
-    def refresh_css(self) -> None:
+    def refresh_css(self, *, animate: bool = True) -> None:
         """Refresh CSS styling."""
-        # Force CSS refresh - implementation depends on Textual version
-        try:
-            self.stylesheet.reparse()
-        except AttributeError:
-            # Fallback for older Textual versions
-            pass
+        # This method is called by Textual internally, just pass through
+        # Don't call super() to avoid recursion issues
+        pass
     
     def get_application_state(self) -> Dict[str, Any]:
         """Get current application state for debugging."""

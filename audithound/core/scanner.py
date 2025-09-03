@@ -1,6 +1,7 @@
 """Security scanner core functionality."""
 
 import json
+import logging
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -24,7 +25,14 @@ class SecurityScanner:
     
     def __init__(self, config: Config):
         self.config = config
-        self.docker_runner = DockerRunner() if config.use_docker else None
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        
+        if config.use_docker:
+            self.logger.info("Initializing Docker runner for scanners")
+            self.docker_runner = DockerRunner()
+        else:
+            self.logger.info("Using local scanner binaries")
+            self.docker_runner = None
         
         # Initialize available scanners
         self.available_scanners = {
@@ -43,14 +51,17 @@ class SecurityScanner:
         target_path = Path(target).resolve()
         
         if not target_path.exists():
+            self.logger.error(f"Target path does not exist: {target}")
             raise FileNotFoundError(f"Target path does not exist: {target}")
         
         # Determine which scanners to run
         scanners_to_run = self._get_enabled_scanners(tools)
         
         if not scanners_to_run:
+            self.logger.error("No scanners enabled or available")
             raise ValueError("No scanners enabled or available")
         
+        self.logger.info(f"Starting scan of {target} with {len(scanners_to_run)} scanners: {list(scanners_to_run.keys())}")
         print(f"🔍 Scanning {target} with {len(scanners_to_run)} scanners...")
         
         # Run scanners

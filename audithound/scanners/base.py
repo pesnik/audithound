@@ -1,5 +1,6 @@
 """Base scanner interface for all security scanners."""
 
+import logging
 import shutil
 import subprocess
 from abc import ABC, abstractmethod
@@ -17,6 +18,7 @@ class BaseScanner(ABC):
         self.config = config
         self.docker_runner = docker_runner
         self.name = self.__class__.__name__.replace('Scanner', '').lower()
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
     
     @abstractmethod
     def scan(self, target: Path) -> List[Dict[str, Any]]:
@@ -59,26 +61,38 @@ class BaseScanner(ABC):
     
     def is_available(self) -> bool:
         """Check if the scanner is available (installed)."""
+        self.logger.debug(f"Checking availability for {self.name} scanner")
+        
         if self.docker_runner:
             # If using Docker, assume scanner is available in container
+            self.logger.debug(f"{self.name} using Docker, assuming available")
             return True
         
         # Check if scanner binary is in PATH directly
-        if shutil.which(self.get_binary_name()) is not None:
+        binary_name = self.get_binary_name()
+        if shutil.which(binary_name) is not None:
+            self.logger.debug(f"{self.name} binary found in PATH: {binary_name}")
             return True
             
         # Check if uv is available and can run the scanner
         if shutil.which('uv') is not None:
             try:
+                self.logger.debug(f"Trying to run {self.name} via uv")
                 result = subprocess.run(
-                    ['uv', 'run', self.get_binary_name(), '--help'],
+                    ['uv', 'run', binary_name, '--help'],
                     capture_output=True,
                     timeout=10
                 )
-                return result.returncode == 0
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                pass
+                available = result.returncode == 0
+                if available:
+                    self.logger.debug(f"{self.name} available via uv")
+                else:
+                    self.logger.debug(f"{self.name} not available via uv (exit code: {result.returncode})")
+                return available
+            except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+                self.logger.debug(f"{self.name} check via uv failed: {e}")
         
+        self.logger.warning(f"{self.name} scanner not available")
         return False
     
     def get_binary_name(self) -> str:

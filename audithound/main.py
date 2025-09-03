@@ -8,6 +8,7 @@ from typing import Optional, List
 from .tui.app import AuditHoundTUI
 from .core.scanner import SecurityScanner
 from .core.config import Config
+from .utils.logging_config import configure_for_cli, configure_for_tui
 
 app = typer.Typer(
     name="audithound",
@@ -28,8 +29,16 @@ def scan(
     format: Optional[str] = typer.Option("json", "--format", "-f", help="Output format (json, csv, xml, html, sarif)"),
     severity: Optional[str] = typer.Option(None, "--severity", "-s", help="Minimum severity threshold (critical, high, medium, low, info)"),
     docker: Optional[bool] = typer.Option(None, "--docker/--no-docker", help="Use Docker for scanners"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
+    quiet: bool = typer.Option(False, "--quiet", "-q", help="Minimize output"),
 ):
     """Run security audit scan on target directory or repository."""
+    
+    # Setup logging first
+    if interactive:
+        configure_for_tui()
+    else:
+        configure_for_cli(verbose=verbose, quiet=quiet)
     
     target_path = Path(target)
     if not target_path.exists():
@@ -180,6 +189,9 @@ def tui(
 ):
     """Launch the interactive TUI interface."""
     
+    # Setup TUI-optimized logging
+    configure_for_tui()
+    
     target_path = Path(target)
     if not target_path.exists():
         console.print(f"[red]❌ Target path does not exist: {target}[/red]")
@@ -213,6 +225,67 @@ def version():
     """Show AuditHound version."""
     from . import __version__
     console.print(f"[cyan]AuditHound[/cyan] v{__version__}")
+
+
+@app.command()
+def logs(
+    tail: int = typer.Option(50, "--tail", "-n", help="Number of recent log lines to show"),
+    follow: bool = typer.Option(False, "--follow", "-f", help="Follow log file (like tail -f)"),
+    level: Optional[str] = typer.Option(None, "--level", "-l", help="Filter by log level"),
+    clear: bool = typer.Option(False, "--clear", help="Clear log files"),
+):
+    """View and manage application logs."""
+    from .utils.logging_config import get_log_file_path
+    
+    log_file = get_log_file_path()
+    
+    if clear:
+        if log_file.exists():
+            log_file.unlink()
+            console.print("[green]✅ Log file cleared[/green]")
+        else:
+            console.print("[yellow]⚠️  No log file found[/yellow]")
+        return
+    
+    if not log_file.exists():
+        console.print(f"[yellow]⚠️  Log file not found: {log_file}[/yellow]")
+        console.print("Run a scan to generate logs")
+        return
+    
+    console.print(f"[cyan]📋 Log file: {log_file}[/cyan]")
+    console.print(f"[cyan]📏 Size: {log_file.stat().st_size / 1024:.1f} KB[/cyan]")
+    
+    if follow:
+        console.print("[cyan]Following log file (Ctrl+C to stop)...[/cyan]")
+        import subprocess
+        try:
+            subprocess.run(['tail', '-f', str(log_file)])
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Stopped following logs[/yellow]")
+    else:
+        try:
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                
+            if level:
+                lines = [line for line in lines if level.upper() in line]
+            
+            recent_lines = lines[-tail:] if len(lines) > tail else lines
+            
+            console.print(f"[cyan]Showing last {len(recent_lines)} lines:[/cyan]")
+            for line in recent_lines:
+                line = line.rstrip()
+                if 'ERROR' in line:
+                    console.print(f"[red]{line}[/red]")
+                elif 'WARNING' in line:
+                    console.print(f"[yellow]{line}[/yellow]")
+                elif 'DEBUG' in line:
+                    console.print(f"[dim]{line}[/dim]")
+                else:
+                    console.print(line)
+                    
+        except Exception as e:
+            console.print(f"[red]❌ Error reading log file: {e}[/red]")
 
 
 @app.command()
