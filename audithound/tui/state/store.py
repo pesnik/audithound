@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Callable, Set
 from collections import defaultdict
 
-from ..core.config import Config
+from ...core.config import Config
 from .actions import Action, ActionType
 from .events import Event, EventType
 

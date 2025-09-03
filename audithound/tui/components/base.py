@@ -1,7 +1,7 @@
 """Base component class for TUI widgets."""
 
 import logging
-from abc import ABC, abstractmethod
+# from abc import ABC, abstractmethod  # Not needed anymore
 from typing import Any, Dict, Optional, Callable
 from textual.widget import Widget
 from textual.reactive import reactive
@@ -11,7 +11,7 @@ from ..state.events import Event, EventType
 from ..state.actions import Action
 
 
-class BaseComponent(Widget, ABC):
+class BaseComponent(Widget):
     """Base class for all TUI components with state management."""
     
     # Reactive attributes
@@ -57,9 +57,8 @@ class BaseComponent(Widget, ABC):
         
         self.on_component_unmounted()
     
-    # Abstract methods for subclasses
+    # Methods for subclasses to override
     
-    @abstractmethod
     def on_component_mounted(self) -> None:
         """Called when component is fully mounted."""
         pass
@@ -68,7 +67,6 @@ class BaseComponent(Widget, ABC):
         """Called when component is being unmounted."""
         pass
     
-    @abstractmethod
     def on_state_changed(self, new_state, old_state) -> None:
         """Called when subscribed state changes."""
         pass

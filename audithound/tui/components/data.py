@@ -267,7 +267,7 @@ class FilterableTable(BaseComponent):
     def _refresh_table(self) -> None:
         """Refresh the table display with filtered data."""
         table = self.query_one("#data-table", DataTable)
-        table.clear()
+        table.clear(columns=True)
         
         # Re-add columns (in case they changed)
         for column in self.columns:

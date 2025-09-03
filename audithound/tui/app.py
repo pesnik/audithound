@@ -11,8 +11,8 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import Header, Footer, TabbedContent, TabPane, Static
 from textual.screen import Screen
 
-from ...core.config import Config
-from ...core.scanner import SecurityScanner
+from ..core.config import Config
+from ..core.scanner import SecurityScanner
 from .state.store import AppStore, AppState
 from .state.events import EventType, Event
 from .state.actions import Action, ActionType, start_scan_action, change_tab_action

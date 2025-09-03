@@ -36,12 +36,7 @@ class ProgressIndicator(BaseComponent):
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Static(self.status, id="progress-status")
-            yield ProgressBar(
-                total=self.total,
-                progress=self.progress,
-                show_eta=self.show_eta,
-                id="main-progress"
-            )
+            yield ProgressBar(id="main-progress")
             if self.show_details:
                 with Horizontal():
                     yield Label("", id="progress-details")
@@ -192,7 +187,7 @@ class ProgressIndicator(BaseComponent):
         
         try:
             progress_bar = self.query_one("#main-progress", ProgressBar)
-            progress_bar.update(progress=self.progress)
+            progress_bar.progress = self.progress
         except Exception as e:
             self.logger.debug(f"Error updating progress bar: {e}")
     
@@ -221,7 +216,7 @@ class StreamingProgress(BaseComponent):
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Static("Overall Progress", classes="progress-title")
-            yield ProgressBar(total=100, progress=0, id="overall-progress")
+            yield ProgressBar(id="overall-progress")
             yield Static("", id="overall-status")
             
             # Individual scanner progress bars
@@ -287,11 +282,7 @@ class StreamingProgress(BaseComponent):
                 with container:
                     with Horizontal(classes="scanner-progress-row"):
                         yield Static(f"{scanner_name}:", classes="scanner-label")
-                        yield ProgressBar(
-                            total=100,
-                            progress=0,
-                            id=f"progress-{scanner_name}"
-                        )
+                        yield ProgressBar(id=f"progress-{scanner_name}")
                         yield Static(
                             self.scanner_status.get(scanner_name, "Ready"),
                             id=f"status-{scanner_name}",
@@ -306,7 +297,7 @@ class StreamingProgress(BaseComponent):
             overall_bar = self.query_one("#overall-progress", ProgressBar)
             overall_status = self.query_one("#overall-status", Static)
             
-            overall_bar.update(progress=self.overall_progress)
+            overall_bar.progress = self.overall_progress
             
             if self.overall_progress >= 100:
                 status_text = "All scanners completed"
@@ -328,7 +319,7 @@ class StreamingProgress(BaseComponent):
             progress = self.scanner_progress[scanner_name]
             status = self.scanner_status[scanner_name]
             
-            progress_bar.update(progress=progress)
+            progress_bar.progress = progress
             status_label.update(status)
             
         except Exception as e:

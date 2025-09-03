@@ -133,7 +133,7 @@ class ScanService:
             self.cancel_current_scan()
             
             # Shutdown thread pool
-            self._scan_thread_pool.shutdown(wait=True, timeout=30)
+            self._scan_thread_pool.shutdown(wait=True)
             
             self.logger.info("Scan service cleanup completed")
         

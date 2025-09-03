@@ -38,23 +38,23 @@ class ConfigurationScreen(BaseComponent):
             with TabbedContent(initial="scanners", id="config-tabs"):
                 # Scanner Configuration
                 with TabPane("🔍 Scanners", id="scanners"):
-                    yield self._create_scanner_config()
+                    yield Static("Scanner configuration - implementation in progress")
                 
                 # Target Configuration
                 with TabPane("🎯 Targets", id="targets"):
-                    yield self._create_target_config()
+                    yield Static("Target configuration - implementation in progress")
                 
                 # Output Configuration
                 with TabPane("📤 Output", id="output"):
-                    yield self._create_output_config()
+                    yield Static("Output configuration - implementation in progress")
                 
                 # Environment Configuration
                 with TabPane("🐳 Environment", id="environment"):
-                    yield self._create_environment_config()
+                    yield Static("Environment configuration - implementation in progress")
                 
                 # Themes Configuration
                 with TabPane("🎨 Themes", id="themes"):
-                    yield self._create_theme_config()
+                    yield Static("Theme configuration - implementation in progress")
     
     def _setup_event_listeners(self) -> None:
         """Setup configuration event listeners."""
