@@ -334,7 +334,7 @@ class MockScanner:
     
     def __init__(self, config: Config):
         self.config = config
-        self.available_scanners = ["bandit", "safety", "semgrep"]
+        self.available_scanners = ["bandit", "safety", "semgrep", "trufflehog", "checkov"]
     
     def scan(self, target: str, tools: List[str] = None):
         """Mock scan implementation."""

@@ -110,6 +110,8 @@ class ConfigurationScreen(Widget):
             Button("Toggle Bandit Scanner", id="toggle-bandit"),
             Button("Toggle Semgrep Scanner", id="toggle-semgrep"), 
             Button("Toggle Safety Scanner", id="toggle-safety"),
+            Button("Toggle TruffleHog Scanner", id="toggle-trufflehog"),
+            Button("Toggle Checkov Scanner", id="toggle-checkov"),
             Static(""),  # spacer
             
             # Output settings
@@ -155,6 +157,14 @@ class ConfigurationScreen(Widget):
             self.logger.debug("Toggling Safety scanner")
             self.app.notify("Safety scanner toggled", timeout=2)
             self.logger.info("Safety scanner toggle completed")
+        elif button_id == "toggle-trufflehog":
+            self.logger.debug("Toggling TruffleHog scanner")
+            self.app.notify("TruffleHog scanner toggled", timeout=2)
+            self.logger.info("TruffleHog scanner toggle completed")
+        elif button_id == "toggle-checkov":
+            self.logger.debug("Toggling Checkov scanner")
+            self.app.notify("Checkov scanner toggled", timeout=2)
+            self.logger.info("Checkov scanner toggle completed")
         elif button_id == "output-format":
             self.logger.debug("Changing output format")
             self.app.notify("Output format changed", timeout=2)
