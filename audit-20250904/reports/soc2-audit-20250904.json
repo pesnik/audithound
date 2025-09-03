@@ -1,0 +1,111 @@
+{
+  "framework": "SOC 2 Type II",
+  "framework_version": "2017",
+  "scan_target": ".",
+  "scan_date": "2025-09-03T18:16:48.836177+00:00",
+  "auditor": "Security Team",
+  "organization": "Enterprise Organization",
+  "total_controls": 5,
+  "compliant_controls": 1,
+  "non_compliant_controls": 2,
+  "needs_review_controls": 2,
+  "compliance_percentage": 20.0,
+  "executive_summary": "EXECUTIVE SUMMARY\n\nThis automated security audit evaluated 5 applicable SOC 2 Type II controls using industry-standard SAST, SCA, and secrets detection tools.\n\nCOMPLIANCE OVERVIEW:\n\u2022 Overall Compliance Rate: 20.0%\n\u2022 Fully Compliant Controls: 1 (20.0% of applicable controls)\n\u2022 Non-Compliant Controls: 2 (40.0% of applicable controls)  \n\u2022 Controls Requiring Review: 2 (40.0% of applicable controls)\n\nRISK ASSESSMENT:\n\u2022 RISK LEVEL: CRITICAL - Extensive non-compliance requiring urgent action",
+  "detailed_findings": [
+    {
+      "control_id": "CC6.1",
+      "scanner": "bandit, semgrep, trufflehog",
+      "finding_count": 3,
+      "critical_count": 1,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "non_compliant",
+      "evidence_files": [
+        "app.py",
+        "utils.py",
+        ".env"
+      ],
+      "remediation_notes": "Control CC6.1 has 3 findings. IMMEDIATE REMEDIATION REQUIRED: Review access controls, encryption, and authentication mechanisms."
+    },
+    {
+      "control_id": "CC6.2",
+      "scanner": "bandit, semgrep",
+      "finding_count": 2,
+      "critical_count": 0,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "needs_review",
+      "evidence_files": [
+        "app.py",
+        "utils.py"
+      ],
+      "remediation_notes": "Control CC6.2 has 2 findings. REVIEW RECOMMENDED: Review access controls, encryption, and authentication mechanisms."
+    },
+    {
+      "control_id": "CC6.3",
+      "scanner": "trufflehog, bandit",
+      "finding_count": 3,
+      "critical_count": 1,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "non_compliant",
+      "evidence_files": [
+        ".env",
+        "app.py",
+        "utils.py"
+      ],
+      "remediation_notes": "Control CC6.3 has 3 findings. IMMEDIATE REMEDIATION REQUIRED: Review access controls, encryption, and authentication mechanisms."
+    },
+    {
+      "control_id": "CC7.1",
+      "scanner": "semgrep, checkov",
+      "finding_count": 0,
+      "critical_count": 0,
+      "high_count": 0,
+      "medium_count": 0,
+      "low_count": 0,
+      "status": "compliant",
+      "evidence_files": [],
+      "remediation_notes": "Control is compliant. Continue current security practices and monitor regularly."
+    },
+    {
+      "control_id": "CC7.2",
+      "scanner": "bandit, safety, semgrep",
+      "finding_count": 3,
+      "critical_count": 0,
+      "high_count": 2,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "needs_review",
+      "evidence_files": [
+        "app.py",
+        "utils.py",
+        "requirements.txt"
+      ],
+      "remediation_notes": "Control CC7.2 has 3 findings. REVIEW RECOMMENDED: Review access controls, encryption, and authentication mechanisms."
+    }
+  ],
+  "recommendations": [
+    "IMMEDIATE ACTION: Address 2 controls with critical security findings. These represent severe security vulnerabilities requiring urgent remediation.",
+    "HIGH PRIORITY: Remediate 4 controls with high-severity findings within 30 days.",
+    "COMPLIANCE REMEDIATION: 2 controls are currently non-compliant. Develop remediation plans with defined timelines and responsible parties.",
+    "Implement automated security scanning in CI/CD pipelines to prevent regression.",
+    "Establish regular security audit cycles (quarterly recommended).",
+    "Provide security training to development teams on secure coding practices.",
+    "Document all remediation efforts for audit trail purposes.",
+    "Consider engaging security consultants for complex compliance requirements."
+  ],
+  "attestation": {
+    "auditor_statement": "This security audit was conducted using AuditHound automated scanning tools in accordance with SOC 2 Type II 2017 controls.",
+    "methodology": "Automated static analysis using Bandit, Semgrep, Safety, TruffleHog, and Checkov scanners",
+    "scope": "Source code and infrastructure analysis of .",
+    "limitations": "This automated audit covers technical controls only. Manual review of business processes and physical controls is recommended.",
+    "auditor": "Security Team",
+    "auditor_title": "Security Analyst",
+    "audit_firm": "Enterprise Organization",
+    "date": "2025-09-03T18:16:48.836177+00:00"
+  }
+}

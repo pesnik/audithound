@@ -1,0 +1,224 @@
+# AuditHound Enterprise Audit Configuration
+# Optimized for compliance audits and enterprise environments
+
+# Target configuration
+target: "."
+organization:
+  name: "Your Company Name"
+  industry: "Technology"  # Finance, Healthcare, Government, etc.
+  compliance_requirements: ["SOC2", "NIST", "CIS"]
+
+# Audit settings
+audit:
+  auditor_name: "Security Team"
+  auditor_title: "Chief Security Officer"
+  audit_frequency: "quarterly"  # daily, weekly, monthly, quarterly, annually
+  retain_reports: 365  # days to retain audit reports
+  
+# Output configuration optimized for audits
+output:
+  format: "json"  # json, yaml, sarif, csv
+  file: "compliance-audit-{date}.json"
+  include_passed: true  # Include passing controls for complete evidence
+  group_by_severity: true
+  include_metadata: true
+  pretty_print: true
+  generate_summary: true
+  
+# Comprehensive scanner configuration for audit compliance
+scanners:
+  # SAST - Static Application Security Testing
+  bandit:
+    enabled: true
+    severity_threshold: "low"  # Catch everything for audit completeness
+    args: 
+      - "--format"
+      - "json"
+      - "--output"
+      - "bandit-detailed.json"
+    exclude_patterns:
+      - "*/tests/*"
+      - "*/test_*.py"
+      - "*/.venv/*"
+      - "*/venv/*"
+      - "*/__pycache__/*"
+    
+  semgrep:
+    enabled: true
+    severity_threshold: "low"
+    args:
+      - "--config=auto"  # Use Semgrep's curated rules
+      - "--json"
+      - "--output=semgrep-detailed.json"
+    include_experimental: false
+    
+  # SCA - Software Composition Analysis  
+  safety:
+    enabled: true
+    severity_threshold: "low"
+    args:
+      - "--json"
+      - "--output"
+      - "safety-detailed.json"
+    check_development_dependencies: true
+    
+  # Secrets Detection
+  trufflehog:
+    enabled: true
+    args:
+      - "--json"
+      - "--output"
+      - "trufflehog-detailed.json"
+      - "--only-verified"  # Focus on verified secrets for audit
+    scan_depth: 100  # commits to scan in git history
+    
+  # Infrastructure as Code Security
+  checkov:
+    enabled: true
+    severity_threshold: "medium"  
+    args:
+      - "--output"
+      - "json"
+      - "--output-file"
+      - "checkov-detailed.json"
+      - "--framework"
+      - "terraform,kubernetes,dockerfile"
+    
+# File inclusion/exclusion patterns
+include_patterns:
+  - "*.py"      # Python source
+  - "*.js"      # JavaScript
+  - "*.ts"      # TypeScript  
+  - "*.jsx"     # React
+  - "*.tsx"     # React TypeScript
+  - "*.java"    # Java
+  - "*.go"      # Go
+  - "*.rs"      # Rust
+  - "*.tf"      # Terraform
+  - "*.yaml"    # YAML configs
+  - "*.yml"     # YAML configs
+  - "*.json"    # JSON configs
+  - "*.xml"     # XML configs
+  - "*.sh"      # Shell scripts
+  - "*.dockerfile" # Docker files
+  - "Dockerfile*"  # Docker files
+  - "requirements*.txt"  # Python deps
+  - "package.json"       # Node deps
+  - "go.mod"            # Go deps
+  - "Cargo.toml"        # Rust deps
+
+exclude_patterns:
+  # Build artifacts
+  - "*/build/*"
+  - "*/dist/*"
+  - "*/out/*"
+  - "*/target/*"
+  
+  # Dependencies
+  - "*/node_modules/*"
+  - "*/vendor/*"
+  - "*/.venv/*"
+  - "*/venv/*"
+  - "*/.virtualenv/*"
+  
+  # Version control
+  - "*/.git/*"
+  - "*/.svn/*"
+  - "*/.hg/*"
+  
+  # IDE and editor files
+  - "*/.vscode/*"
+  - "*/.idea/*"
+  - "*.swp"
+  - "*.tmp"
+  
+  # Test files (include if testing security is in scope)
+  - "*/test/*"
+  - "*/tests/*"
+  - "*/*_test.py"
+  - "*/*_test.go"
+  - "*/*.test.js"
+  - "*/*.spec.js"
+  
+  # Logs and temporary files
+  - "*.log"
+  - "*/logs/*"
+  - "*/tmp/*"
+  - "*/temp/*"
+
+# Docker configuration for isolated scanning
+docker:
+  enabled: false  # Set to true for production environments
+  timeout: 600    # 10 minutes per scanner
+  memory_limit: "2g"
+  cpu_limit: "1.0"
+  network_mode: "none"  # Isolated network for security
+  
+# Performance settings for enterprise environments  
+performance:
+  max_concurrent_scanners: 3
+  max_file_size: "50MB" 
+  max_scan_time: 3600  # 1 hour total scan timeout
+  enable_caching: true
+  cache_duration: 86400  # 24 hours
+  
+# Compliance reporting settings
+compliance:
+  frameworks:
+    soc2:
+      enabled: true
+      version: "2017"
+      focus_areas: ["Security", "Availability", "Confidentiality"]
+    
+    nist:
+      enabled: true  
+      version: "1.1"
+      categories: ["Identify", "Protect", "Detect", "Respond", "Recover"]
+      
+    cis:
+      enabled: true
+      version: "8.0"
+      implementation_groups: [1, 2, 3]  # Basic, Foundational, Organizational
+      
+    owasp:
+      enabled: true
+      version: "4.0"
+      verification_levels: [1, 2, 3]  # Standard, Advanced, Expert
+      
+  evidence:
+    collect_remediation_evidence: true
+    before_after_comparisons: true
+    trend_analysis: true
+    risk_scoring: true
+    
+# Integration settings
+integrations:
+  jira:
+    enabled: false
+    url: ""
+    project_key: ""
+    issue_type: "Security Finding"
+    
+  slack:
+    enabled: false 
+    webhook_url: ""
+    channel: "#security-alerts"
+    
+  email:
+    enabled: false
+    smtp_server: ""
+    recipients: []
+    
+# Logging and monitoring
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "audithound.log"
+  rotate_size: "10MB"
+  backup_count: 5
+  include_scanner_logs: true
+  
+monitoring:
+  metrics_enabled: true
+  performance_tracking: true
+  scan_history: true
+  compliance_trends: true

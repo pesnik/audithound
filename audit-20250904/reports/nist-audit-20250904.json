@@ -1,0 +1,113 @@
+{
+  "framework": "NIST Cybersecurity Framework",
+  "framework_version": "1.1",
+  "scan_target": ".",
+  "scan_date": "2025-09-03T18:16:49.507838+00:00",
+  "auditor": "Security Team",
+  "organization": "Enterprise Organization",
+  "total_controls": 5,
+  "compliant_controls": 0,
+  "non_compliant_controls": 4,
+  "needs_review_controls": 1,
+  "compliance_percentage": 0.0,
+  "executive_summary": "EXECUTIVE SUMMARY\n\nThis automated security audit evaluated 5 applicable NIST Cybersecurity Framework controls using industry-standard SAST, SCA, and secrets detection tools.\n\nCOMPLIANCE OVERVIEW:\n\u2022 Overall Compliance Rate: 0.0%\n\u2022 Fully Compliant Controls: 0 (0.0% of applicable controls)\n\u2022 Non-Compliant Controls: 4 (80.0% of applicable controls)  \n\u2022 Controls Requiring Review: 1 (20.0% of applicable controls)\n\nRISK ASSESSMENT:\n\u2022 RISK LEVEL: CRITICAL - Extensive non-compliance requiring urgent action",
+  "detailed_findings": [
+    {
+      "control_id": "ID.AM-2",
+      "scanner": "safety, semgrep",
+      "finding_count": 1,
+      "critical_count": 0,
+      "high_count": 1,
+      "medium_count": 0,
+      "low_count": 0,
+      "status": "needs_review",
+      "evidence_files": [
+        "requirements.txt"
+      ],
+      "remediation_notes": "Control ID.AM-2 has 1 findings. REVIEW RECOMMENDED: Update asset inventory and risk assessment procedures."
+    },
+    {
+      "control_id": "PR.DS-1",
+      "scanner": "bandit, trufflehog",
+      "finding_count": 3,
+      "critical_count": 1,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "non_compliant",
+      "evidence_files": [
+        "app.py",
+        "utils.py",
+        ".env"
+      ],
+      "remediation_notes": "Control PR.DS-1 has 3 findings. IMMEDIATE REMEDIATION REQUIRED: Strengthen protective controls and data handling procedures."
+    },
+    {
+      "control_id": "PR.DS-2",
+      "scanner": "bandit, semgrep",
+      "finding_count": 2,
+      "critical_count": 0,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "non_compliant",
+      "evidence_files": [
+        "app.py",
+        "utils.py"
+      ],
+      "remediation_notes": "Control PR.DS-2 has 2 findings. IMMEDIATE REMEDIATION REQUIRED: Strengthen protective controls and data handling procedures."
+    },
+    {
+      "control_id": "DE.CM-4",
+      "scanner": "bandit, semgrep, safety",
+      "finding_count": 3,
+      "critical_count": 0,
+      "high_count": 2,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "non_compliant",
+      "evidence_files": [
+        "app.py",
+        "utils.py",
+        "requirements.txt"
+      ],
+      "remediation_notes": "Control DE.CM-4 has 3 findings. IMMEDIATE REMEDIATION REQUIRED: Enhance monitoring and detection capabilities."
+    },
+    {
+      "control_id": "RS.AN-1",
+      "scanner": "bandit, semgrep, trufflehog",
+      "finding_count": 3,
+      "critical_count": 1,
+      "high_count": 1,
+      "medium_count": 1,
+      "low_count": 0,
+      "status": "non_compliant",
+      "evidence_files": [
+        "app.py",
+        "utils.py",
+        ".env"
+      ],
+      "remediation_notes": "Control RS.AN-1 has 3 findings. IMMEDIATE REMEDIATION REQUIRED: Review incident response procedures and forensic capabilities."
+    }
+  ],
+  "recommendations": [
+    "IMMEDIATE ACTION: Address 2 controls with critical security findings. These represent severe security vulnerabilities requiring urgent remediation.",
+    "HIGH PRIORITY: Remediate 5 controls with high-severity findings within 30 days.",
+    "COMPLIANCE REMEDIATION: 4 controls are currently non-compliant. Develop remediation plans with defined timelines and responsible parties.",
+    "Implement automated security scanning in CI/CD pipelines to prevent regression.",
+    "Establish regular security audit cycles (quarterly recommended).",
+    "Provide security training to development teams on secure coding practices.",
+    "Document all remediation efforts for audit trail purposes.",
+    "Consider engaging security consultants for complex compliance requirements."
+  ],
+  "attestation": {
+    "auditor_statement": "This security audit was conducted using AuditHound automated scanning tools in accordance with NIST Cybersecurity Framework 1.1 controls.",
+    "methodology": "Automated static analysis using Bandit, Semgrep, Safety, TruffleHog, and Checkov scanners",
+    "scope": "Source code and infrastructure analysis of .",
+    "limitations": "This automated audit covers technical controls only. Manual review of business processes and physical controls is recommended.",
+    "auditor": "Security Team",
+    "auditor_title": "Security Analyst",
+    "audit_firm": "Enterprise Organization",
+    "date": "2025-09-03T18:16:49.507838+00:00"
+  }
+}

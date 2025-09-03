@@ -101,7 +101,7 @@ class AuditScreen(BaseComponent):
         color: #ffffff;
     }
     
-    Button.danger {
+    Button.error {
         background: #da3633;
         color: #ffffff;
     }
@@ -129,18 +129,22 @@ class AuditScreen(BaseComponent):
             # Header
             Static("🔍 Enterprise Audit Center", classes="audit-panel"),
             
-            # Main audit interface with tabs
-            TabbedContent(
-                TabPane("Setup", self._create_audit_setup(), id="setup"),
-                TabPane("Checklist", self._create_audit_checklist(), id="checklist"),
-                TabPane("Execute", self._create_audit_execution(), id="execute"),
-                TabPane("Results", self._create_audit_results(), id="results"),
-                initial="setup",
-                id="audit-tabs"
-            ),
-            
             id="audit-main"
         )
+        
+        # Main audit interface with tabs
+        with TabbedContent(initial="setup", id="audit-tabs"):
+            with TabPane("Setup", id="setup"):
+                yield self._create_audit_setup()
+            
+            with TabPane("Checklist", id="checklist"):
+                yield self._create_audit_checklist()
+            
+            with TabPane("Execute", id="execute"):
+                yield self._create_audit_execution()
+            
+            with TabPane("Results", id="results"):
+                yield self._create_audit_results()
     
     def _create_audit_setup(self) -> Vertical:
         """Create the audit setup form."""
@@ -200,7 +204,7 @@ class AuditScreen(BaseComponent):
             Horizontal(
                 Button("💾 Save Configuration", variant="primary", id="save-audit-config"),
                 Button("🔄 Load Template", variant="default", id="load-template"),
-                Button("➡️ Next: Checklist", variant="success", id="goto-checklist")
+                Button("➡️ Next: Checklist", variant="primary", id="goto-checklist")
             )
         )
     
@@ -267,7 +271,7 @@ class AuditScreen(BaseComponent):
                 Button("⬅️ Back: Checklist", variant="default", id="goto-checklist-from-execute"),
                 Button("🚀 Start Audit", variant="primary", id="start-comprehensive-audit"),
                 Button("⏸️ Pause", variant="warning", id="pause-audit"),
-                Button("🛑 Stop", variant="danger", id="stop-audit"),
+                Button("🛑 Stop", variant="error", id="stop-audit"),
                 Button("➡️ View Results", variant="success", id="goto-results")
             )
         )
