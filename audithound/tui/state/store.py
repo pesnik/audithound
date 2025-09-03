@@ -165,8 +165,31 @@ class AppStore:
         """Handle config updates."""
         updates = action.get_payload_value("updates", {})
         for key, value in updates.items():
-            if hasattr(self.state.config, key):
-                setattr(self.state.config, key, value)
+            # Handle dotted notation for nested config updates
+            if '.' in key:
+                parts = key.split('.')
+                target = self.state.config
+                
+                # Navigate to the parent object
+                for part in parts[:-1]:
+                    if hasattr(target, part):
+                        target = getattr(target, part)
+                    else:
+                        self._logger.warning(f"Config path {key} not found - parent {part} missing")
+                        break
+                else:
+                    # Set the final value
+                    final_key = parts[-1]
+                    if hasattr(target, final_key):
+                        setattr(target, final_key, value)
+                    else:
+                        self._logger.warning(f"Config path {key} not found - final key {final_key} missing")
+            else:
+                # Handle direct attributes
+                if hasattr(self.state.config, key):
+                    setattr(self.state.config, key, value)
+                else:
+                    self._logger.warning(f"Config attribute {key} not found")
         
         if action.get_meta_value("save", False):
             self._save_config()

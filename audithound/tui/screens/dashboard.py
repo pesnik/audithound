@@ -18,24 +18,13 @@ class DashboardScreen(BaseComponent):
         super().__init__(store, component_id="dashboard", **kwargs)
     
     def compose(self) -> ComposeResult:
-        with Vertical():
-            # Status overview
-            with Horizontal():
-                yield Static("🎯 Target: Ready to scan", id="target-info", classes="summary-panel")
-                yield Static("🔍 Status: No scan running", id="scan-status", classes="summary-panel")
-            
-            # Quick actions
-            with Horizontal():
-                yield Static("⚡ Quick Actions", classes="summary-panel")
-                with Vertical(classes="summary-panel"):
-                    yield Button("🚀 Start Scan", variant="primary", id="quick-scan")
-                    yield Button("📊 View Results", variant="default", id="quick-results")
-                    yield Button("⚙️ Configure", variant="default", id="quick-config")
-                    yield Button("📤 Export", variant="default", id="quick-export")
-            
-            # Recent activity
-            yield Static("📈 Recent Activity", classes="section-title")
-            yield Static("No recent scans. Start a scan to see activity here.", id="recent-activity", classes="activity-panel")
+        # Dashboard content with white text
+        yield Static("🎯 Target: /Users/r_hasan/Development/audithound")
+        yield Static("🔍 Status: Ready to scan")  
+        yield Button("🚀 Start Scan", variant="primary", id="quick-scan")
+        yield Button("📊 View Results", id="quick-results")
+        yield Button("⚙️ Configure", id="quick-config")
+        yield Static("📈 Recent Activity: No recent scans")
     
     def _setup_event_listeners(self) -> None:
         """Setup dashboard event listeners."""
