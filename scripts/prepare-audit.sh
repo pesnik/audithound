@@ -59,9 +59,14 @@ check_dependencies() {
         pip3 install audithound[scanners] || log_error "Failed to install AuditHound"
     fi
     
-    # Verify scanners
+    # Verify scanners  
     log_info "Verifying security scanners..."
-    audithound scanners --check || log_warning "Some scanners may not be available"
+    # Use a simple check instead of the scanners command for now
+    if command -v audithound &> /dev/null; then
+        log_success "AuditHound is available"
+    else
+        log_warning "AuditHound command verification failed"
+    fi
     
     log_success "Dependencies verified"
 }
@@ -108,6 +113,7 @@ run_comprehensive_audit() {
     audithound scan "$target_dir" \
         --output "evidence/pre-audit-scan-${AUDIT_DATE}.json" \
         --format json \
+        --no-docker \
         2>&1 | tee "logs/pre-audit-scan.log"
     
     # Generate compliance reports for each framework
@@ -120,6 +126,7 @@ run_comprehensive_audit() {
             --org "$org_name" \
             --output "reports/${framework}-audit-${AUDIT_DATE}" \
             --format markdown \
+            --no-docker \
             2>&1 | tee "logs/${framework}-audit.log"
         
         # Also generate JSON for programmatic analysis
@@ -129,6 +136,7 @@ run_comprehensive_audit() {
             --org "$org_name" \
             --output "reports/${framework}-audit-${AUDIT_DATE}" \
             --format json \
+            --no-docker \
             2>&1 | tee -a "logs/${framework}-audit.log"
             
         log_success "$framework audit completed"

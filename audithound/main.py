@@ -189,7 +189,8 @@ def audit(
     output: Path = typer.Option("audit-report", "--output", "-o", help="Output file prefix"),
     format: str = typer.Option("markdown", "--format", help="Report format (json, yaml, markdown)"),
     tools: Optional[str] = typer.Option("bandit,safety,semgrep,trufflehog,checkov", "--tools", "-t", help="Comma-separated scanners"),
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Configuration file")
+    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Configuration file"),
+    no_docker: bool = typer.Option(False, "--no-docker", help="Disable Docker for scanner execution")
 ) -> None:
     """🔍 Generate comprehensive compliance audit report."""
     from datetime import datetime
@@ -212,6 +213,11 @@ def audit(
     else:
         audit_config = Config.default()
         console.print("[yellow]⚠️ Using default configuration[/yellow]")
+    
+    # Disable Docker if requested
+    if no_docker:
+        audit_config.use_docker = False
+        console.print("[yellow]⚠️ Docker disabled - using local scanners[/yellow]")
     
     # Select compliance framework
     framework_map = {
