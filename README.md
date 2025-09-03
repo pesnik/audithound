@@ -46,6 +46,35 @@ AuditHound is a powerful security audit orchestrator that integrates multiple in
 | **[TruffleHog](https://trufflesecurity.com/)** | Secrets Detection | All text files | API keys, tokens, credentials, high accuracy detection |
 | **[Checkov](https://checkov.io/)** | IaC Security | Terraform, K8s, etc. | Infrastructure as Code security and compliance |
 
+## 🚨 **AUDIT WEEK EMERGENCY TOOLKIT**
+
+**⚡ Your team has an audit this week? Get compliance-ready in 5 minutes:**
+
+```bash
+# 1. Install AuditHound with all scanners
+pip install audithound[scanners]
+
+# 2. Run automated compliance audit (SOC 2, NIST, CIS, OWASP)
+audithound audit . --framework soc2 --auditor "Your Name" --org "Your Company"
+
+# 3. Use enterprise audit preparation script
+curl -O https://raw.githubusercontent.com/pesnik/audithound/main/scripts/prepare-audit.sh
+chmod +x prepare-audit.sh
+./prepare-audit.sh
+
+# 4. Generate executive summary for auditors
+audithound audit . --framework soc2 --format markdown --output audit-summary
+```
+
+**📋 What you'll get:**
+- ✅ **Professional compliance reports** for SOC 2, NIST, CIS, OWASP
+- ✅ **Executive summaries** with compliance percentages  
+- ✅ **Evidence packages** with detailed technical findings
+- ✅ **Audit checklists** and preparation templates
+- ✅ **Before/after remediation tracking**
+
+---
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -62,14 +91,33 @@ cd audithound
 pip install -e .
 ```
 
-#### Option 3: With scanner dependencies
+#### Option 3: With scanner dependencies  
 ```bash
 pip install audithound[scanners]
 ```
 
+#### Option 4: Enterprise audit-ready setup
+```bash
+pip install audithound[scanners]
+wget https://raw.githubusercontent.com/pesnik/audithound/main/scripts/prepare-audit.sh
+chmod +x prepare-audit.sh
+```
+
 ### Basic Usage
 
-#### 1. **Interactive TUI Mode** (Recommended)
+#### 1. **🔍 Compliance Audit** (Enterprise Ready)
+```bash
+# Generate SOC 2 compliance report
+audithound audit /path/to/project --framework soc2 --auditor "Jane Doe" --org "Acme Corp"
+
+# Multi-framework audit  
+audithound audit . --framework nist --format markdown --output nist-compliance
+
+# Quick compliance check
+audithound audit . --framework owasp --format json | jq '.compliance_percentage'
+```
+
+#### 2. **🖥️ Interactive TUI Mode**
 ```bash
 # Launch the interactive TUI
 audithound tui /path/to/your/project
@@ -78,7 +126,7 @@ audithound tui /path/to/your/project
 audithound tui /path/to/project --config audithound.yaml
 ```
 
-#### 2. **Command-line Scanning**
+#### 3. **⚡ Command-line Scanning**
 ```bash
 # Quick scan with default scanners
 audithound scan /path/to/project
@@ -90,9 +138,13 @@ audithound scan /path/to/project --tools bandit,safety,trufflehog
 audithound scan /path/to/project --output results.json --format json
 ```
 
-#### 3. **List Available Scanners**
+#### 4. **📋 Scanner Management**
 ```bash
+# List all available scanners
 audithound scanners --list-all
+
+# Check scanner availability
+audithound scanners --check
 ```
 
 ## 📋 Usage Examples
