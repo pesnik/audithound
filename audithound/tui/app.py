@@ -23,6 +23,7 @@ from .components.data import FilterableTable
 from .screens.dashboard import DashboardScreen
 from .screens.results import ResultsScreen
 from .screens.configuration import ConfigurationScreen
+from .screens.audit import AuditScreen
 from .services.scan_service import ScanService
 from .services.persistence_service import PersistenceService
 
@@ -44,6 +45,7 @@ class AuditHoundTUI(App):
         Binding("1", "focus_dashboard", "Dashboard"),
         Binding("2", "focus_results", "Results"), 
         Binding("3", "focus_configuration", "Configuration"),
+        Binding("4", "focus_audit", "Audit"),
         Binding("f5", "start_scan", "Start Scan"),
         Binding("t", "toggle_theme", "Toggle Theme"),
         Binding("e", "export_results", "Export Results"),
@@ -95,6 +97,7 @@ class AuditHoundTUI(App):
         self._dashboard_screen = None
         self._results_screen = None
         self._configuration_screen = None
+        self._audit_screen = None
         
         # Setup logging
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -229,6 +232,12 @@ class AuditHoundTUI(App):
                 if not self._configuration_screen:
                     self._configuration_screen = ConfigurationScreen(self.store)
                 yield self._configuration_screen
+            
+            # Audit Tab
+            with TabPane("🔍 Audit", id="audit"):
+                if not self._audit_screen:
+                    self._audit_screen = AuditScreen(self.store)
+                yield self._audit_screen
         
         yield Footer()
     
@@ -388,6 +397,10 @@ class AuditHoundTUI(App):
     def action_focus_configuration(self) -> None:
         """Focus the configuration tab."""
         self._change_tab("configuration")
+    
+    def action_focus_audit(self) -> None:
+        """Focus the audit tab."""
+        self._change_tab("audit")
     
     def action_start_scan(self) -> None:
         """Start a security scan."""

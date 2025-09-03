@@ -271,10 +271,17 @@ The TUI provides three main sections:
 - **Theme Options**: Customize the TUI appearance
 - **Advanced Settings**: Docker, performance, and other options
 
+### 🔍 **Audit Tab** (Enterprise Features)
+- **🔧 Setup**: Configure auditor info, frameworks (SOC2, NIST, CIS, OWASP), scanners
+- **📋 Checklist**: Interactive pre-audit preparation checklist with progress tracking
+- **🚀 Execute**: Real-time audit execution with live progress and logging
+- **📊 Results**: Executive dashboard with compliance scores and export options
+
 ### 🔥 **Keyboard Shortcuts**
 - `1` - Dashboard tab
 - `2` - Results tab  
 - `3` - Configuration tab
+- `4` - **🔍 Audit tab** (Enterprise)
 - `F5` - Start scan
 - `t` - Toggle theme
 - `e` - Export results

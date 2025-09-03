@@ -162,7 +162,8 @@ EOF
     for framework in "${FRAMEWORKS[@]}"; do
         if [ -f "reports/${framework}-audit-${AUDIT_DATE}.json" ]; then
             compliance_rate=$(jq -r '.compliance_percentage' "reports/${framework}-audit-${AUDIT_DATE}.json" 2>/dev/null || echo "N/A")
-            echo "- **${framework^^}**: ${compliance_rate}% compliance" >> "reports/executive-summary-${AUDIT_DATE}.md"
+            framework_upper=$(echo "$framework" | tr '[:lower:]' '[:upper:]')
+            echo "- **${framework_upper}**: ${compliance_rate}% compliance" >> "reports/executive-summary-${AUDIT_DATE}.md"
         fi
     done
     
