@@ -226,27 +226,15 @@ class AuditHoundTUI(App):
             
             # Results Tab
             with TabPane("📊 Results", id="results"):
-                yield Static("RESULTS TAB CONTENT")
-                yield Static("Results will show here")
+                if not self._results_screen:
+                    self._results_screen = ResultsScreen(self.store)
+                yield self._results_screen
             
             # Configuration Tab
             with TabPane("⚙️ Configuration", id="configuration"):
                 if not self._configuration_screen:
                     self._configuration_screen = ConfigurationScreen(self.store)
                 yield self._configuration_screen
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn1")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn2")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn3")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn4")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn5")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn6")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn7")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn8")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn9")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn10")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn11")
-                yield Button("💾 Save Configuration", variant="primary", id="save-config-btn12")
         
         yield Footer()
     

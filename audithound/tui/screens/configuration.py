@@ -16,6 +16,32 @@ from textual.widget import Widget
 class ConfigurationScreen(Widget):
     """Screen for managing application configuration."""
     
+    DEFAULT_CSS = """
+    ConfigurationScreen {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+        padding: 1;
+        display: block;
+    }
+    
+    #config-main-vertical {
+        height: auto;
+        min-height: 20;
+        width: 100%;
+    }
+    
+    ConfigurationScreen Static {
+        color: #ffffff;
+        margin: 0 0 1 0;
+    }
+    
+    ConfigurationScreen Button {
+        margin: 0 0 1 0;
+        width: 100%;
+    }
+    """
+    
     def __init__(self, store, **kwargs):
         super().__init__(**kwargs)
         self.store = store
@@ -75,32 +101,34 @@ class ConfigurationScreen(Widget):
         logger.debug(f"Log file: {log_file}")
     
     def compose(self) -> ComposeResult:
-        # # Simple working configuration
-        yield Static("⚙️ AuditHound Configuration")
-        yield Static("")  # spacer
-        
-        # Scanners section
-        yield Static("🔍 Scanner Settings:")
-        yield Button("Toggle Bandit Scanner", id="toggle-bandit")
-        yield Button("Toggle Semgrep Scanner", id="toggle-semgrep") 
-        yield Button("Toggle Safety Scanner", id="toggle-safety")
-        yield Static("")  # spacer
-        
-        # Output settings
-        yield Static("📤 Output Settings:")
-        yield Button("Change Output Format", id="output-format")
-        yield Button("Set Output Path", id="output-path")
-        yield Static("")  # spacer
-        
-        # Theme settings
-        yield Static("🎨 Theme Settings:")
-        yield Button("Toggle Theme", id="theme-toggle")
-        yield Static("")  # spacer
-        
-        # Actions
-        yield Static("💾 Actions:")
-        yield Button("Save Configuration", variant="primary", id="save-all")
-        yield Button("Reset to Defaults", variant="error", id="reset-config")
+        yield Vertical(
+            Static("⚙️ AuditHound Configuration"),
+            Static(""),  # spacer
+            
+            # Scanners section
+            Static("🔍 Scanner Settings:"),
+            Button("Toggle Bandit Scanner", id="toggle-bandit"),
+            Button("Toggle Semgrep Scanner", id="toggle-semgrep"), 
+            Button("Toggle Safety Scanner", id="toggle-safety"),
+            Static(""),  # spacer
+            
+            # Output settings
+            Static("📤 Output Settings:"),
+            Button("Change Output Format", id="output-format"),
+            Button("Set Output Path", id="output-path"),
+            Static(""),  # spacer
+            
+            # Theme settings
+            Static("🎨 Theme Settings:"),
+            Button("Toggle Theme", id="theme-toggle"),
+            Static(""),  # spacer
+            
+            # Actions
+            Static("💾 Actions:"),
+            Button("Save Configuration", variant="primary", id="save-all"),
+            Button("Reset to Defaults", variant="error", id="reset-config"),
+            id="config-main-vertical"
+        )
     
     def on_mount(self) -> None:
         """Initialize configuration screen."""

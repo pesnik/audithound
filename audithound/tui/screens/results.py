@@ -18,6 +18,60 @@ from ..state.events import EventType
 class ResultsScreen(BaseComponent):
     """Screen for displaying and analyzing scan results."""
     
+    DEFAULT_CSS = """
+    ResultsScreen {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+        padding: 1;
+        display: block;
+    }
+    
+    ResultsScreen Vertical {
+        height: auto;
+        min-height: 20;
+        width: 100%;
+    }
+    
+    ResultsScreen Static {
+        color: #ffffff;
+        margin: 0 0 1 0;
+    }
+    
+    ResultsScreen Button {
+        margin: 0 0 1 0;
+        width: auto;
+    }
+    
+    .summary-panel {
+        background: #333333;
+        color: #ffffff;
+        border: solid #666666;
+        padding: 1;
+        margin: 1;
+        min-height: 5;
+    }
+    
+    .filter-bar {
+        margin: 1 0;
+        height: 3;
+    }
+    
+    .progress-section {
+        margin: 1 0;
+        height: auto;
+    }
+    
+    .timeline-panel {
+        background: #2d2d2d;
+        color: #ffffff;
+        border: solid #666666;
+        padding: 1;
+        margin: 1;
+        min-height: 5;
+    }
+    """
+    
     def __init__(self, store, **kwargs):
         super().__init__(store, component_id="results", **kwargs)
         self.current_results = None
