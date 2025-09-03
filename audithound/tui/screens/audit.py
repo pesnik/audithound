@@ -40,13 +40,19 @@ class AuditScreen(BaseComponent):
         width: 100%;
     }
     
+    #audit-tabs {
+        margin: 0;
+        padding: 0;
+    }
+    
     .audit-panel {
         background: #333333;
         color: #ffffff;
         border: solid #666666;
         padding: 1;
-        margin: 1 0;
-        min-height: 5;
+        margin: 0 0 1 0;
+        min-height: 3;
+        max-height: 5;
     }
     
     .audit-form {
@@ -75,7 +81,8 @@ class AuditScreen(BaseComponent):
         border: solid #666666;
         padding: 1;
         margin: 1 0;
-        min-height: 10;
+        min-height: 4;
+        max-height: 6;
     }
     
     .progress-panel {
@@ -84,7 +91,8 @@ class AuditScreen(BaseComponent):
         border: solid #666666;
         padding: 1;
         margin: 1 0;
-        min-height: 8;
+        min-height: 3;
+        max-height: 5;
     }
     
     .audit-results {
@@ -110,6 +118,22 @@ class AuditScreen(BaseComponent):
         background: #bf8700;
         color: #ffffff;
     }
+    
+    Button.success {
+        background: #28a745;
+        color: #ffffff;
+    }
+    
+    Horizontal {
+        margin: 1 0;
+        height: auto;
+    }
+    
+    /* Ensure execute tab content is scrollable */
+    #execute {
+        overflow-y: auto;
+        max-height: 100%;
+    }
     """
     
     # Reactive states
@@ -125,26 +149,23 @@ class AuditScreen(BaseComponent):
         self.completed_checks = set()
         
     def compose(self) -> ComposeResult:
-        yield Vertical(
+        with Vertical(id="audit-main"):
             # Header
-            Static("🔍 Enterprise Audit Center", classes="audit-panel"),
+            yield Static("🔍 Enterprise Audit Center", classes="audit-panel")
             
-            id="audit-main"
-        )
-        
-        # Main audit interface with tabs
-        with TabbedContent(initial="setup", id="audit-tabs"):
-            with TabPane("Setup", id="setup"):
-                yield self._create_audit_setup()
-            
-            with TabPane("Checklist", id="checklist"):
-                yield self._create_audit_checklist()
-            
-            with TabPane("Execute", id="execute"):
-                yield self._create_audit_execution()
-            
-            with TabPane("Results", id="results"):
-                yield self._create_audit_results()
+            # Main audit interface with tabs
+            with TabbedContent(initial="setup", id="audit-tabs"):
+                with TabPane("Setup", id="setup"):
+                    yield self._create_audit_setup()
+                
+                with TabPane("Checklist", id="checklist"):
+                    yield self._create_audit_checklist()
+                
+                with TabPane("Execute", id="execute"):
+                    yield self._create_audit_execution()
+                
+                with TabPane("Results", id="results"):
+                    yield self._create_audit_results()
     
     def _create_audit_setup(self) -> Vertical:
         """Create the audit setup form."""
@@ -307,6 +328,8 @@ class AuditScreen(BaseComponent):
         self.logger.info("AuditScreen mounted")
         self._update_checklist_progress()
         self._initialize_audit_status()
+        self._initialize_execution_widgets()
+        self._initialize_results_widgets()
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle audit screen button presses."""
@@ -423,6 +446,74 @@ class AuditScreen(BaseComponent):
         except Exception as e:
             self.logger.debug(f"Error initializing audit status: {e}")
     
+    def _initialize_execution_widgets(self) -> None:
+        """Initialize the execution tab widgets with placeholder content."""
+        try:
+            # Initialize progress widget
+            progress_widget = self.query_one("#audit-progress", Static)
+            progress_widget.update(Panel(
+                "No audit in progress",
+                title="Audit Progress",
+                border_style="blue"
+            ))
+            
+            # Initialize framework status widget
+            framework_widget = self.query_one("#framework-status", Static)
+            framework_widget.update(Panel(
+                "Frameworks: Not selected\nScanners: Not configured",
+                title="Framework Status", 
+                border_style="blue"
+            ))
+            
+            # Initialize logs widget
+            logs_widget = self.query_one("#audit-logs", Static)
+            logs_widget.update(Panel(
+                "Audit logs will appear here...",
+                title="Audit Logs",
+                border_style="blue"
+            ))
+            
+        except Exception as e:
+            self.logger.debug(f"Error initializing execution widgets: {e}")
+    
+    def _initialize_results_widgets(self) -> None:
+        """Initialize the results tab widgets with placeholder content."""
+        try:
+            # Initialize executive summary
+            summary_widget = self.query_one("#executive-summary", Static)
+            summary_widget.update(Panel(
+                "Executive Summary will appear here after audit completion\n\n🏃‍♂️ Run an audit to generate compliance reports and executive summaries",
+                title="Executive Summary",
+                border_style="blue"
+            ))
+            
+            # Initialize compliance scores
+            scores_widget = self.query_one("#compliance-scores", Static)
+            scores_widget.update(Panel(
+                "Compliance Scores:\n\n📊 SOC 2: Not assessed\n📊 NIST: Not assessed\n📊 CIS: Not assessed\n📊 OWASP: Not assessed",
+                title="Compliance Scores",
+                border_style="blue"
+            ))
+            
+            # Initialize risk assessment
+            risk_widget = self.query_one("#risk-assessment", Static)
+            risk_widget.update(Panel(
+                "Risk Assessment:\n\n⚠️  Overall Risk: Not assessed\n🔍 Critical Issues: 0\n🟡 High Issues: 0\n🟢 Medium Issues: 0",
+                title="Risk Assessment",
+                border_style="blue"
+            ))
+            
+            # Initialize detailed findings
+            findings_widget = self.query_one("#detailed-findings", Static)
+            findings_widget.update(Panel(
+                "Detailed security findings will appear here...\n\n💡 Findings will be organized by:\n  • Framework (SOC2, NIST, CIS, OWASP)\n  • Severity (Critical, High, Medium, Low)\n  • Scanner (Bandit, Semgrep, Safety, etc.)",
+                title="Detailed Findings",
+                border_style="blue"
+            ))
+            
+        except Exception as e:
+            self.logger.debug(f"Error initializing results widgets: {e}")
+    
     def _save_audit_configuration(self) -> None:
         """Save the current audit configuration."""
         self.logger.info("Saving audit configuration")
@@ -439,6 +530,9 @@ class AuditScreen(BaseComponent):
             
             # Save to store state
             self.store.update_state({"audit_config": config_data})
+            
+            # Update framework status display
+            self._update_framework_status()
             
             self.app.notify("Audit configuration saved successfully", timeout=3)
             
@@ -486,6 +580,25 @@ class AuditScreen(BaseComponent):
             self.logger.error(f"Error getting selected scanners: {e}")
             
         return scanners
+    
+    def _update_framework_status(self) -> None:
+        """Update the framework status display with current configuration."""
+        try:
+            frameworks = self._get_selected_frameworks()
+            scanners = self._get_selected_scanners()
+            
+            frameworks_text = ", ".join([f.upper() for f in frameworks]) if frameworks else "None selected"
+            scanners_text = ", ".join(scanners) if scanners else "None selected"
+            
+            framework_widget = self.query_one("#framework-status", Static)
+            framework_widget.update(Panel(
+                f"Frameworks: {frameworks_text}\nScanners: {scanners_text}\n\nConfiguration ready for audit execution",
+                title="Framework Status",
+                border_style="green" if frameworks and scanners else "yellow"
+            ))
+            
+        except Exception as e:
+            self.logger.debug(f"Error updating framework status: {e}")
     
     def _load_configuration_template(self) -> None:
         """Load a configuration template."""
