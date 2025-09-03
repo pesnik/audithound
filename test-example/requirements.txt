@@ -1,0 +1,6 @@
+
+Django==2.0.0
+requests==2.20.0
+Pillow==5.0.0
+PyYAML==3.13
+Jinja2==2.10

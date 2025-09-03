@@ -1,0 +1,52 @@
+docker_timeout: 300
+exclude_paths:
+- .git
+- __pycache__
+- node_modules
+include_hidden: false
+output:
+  file: null
+  format: json
+  group_by_severity: true
+  include_passed: false
+scanners:
+  bandit:
+    args:
+    - -f
+    - json
+    enabled: true
+    exclude_patterns:
+    - '*/test*'
+    - '*/venv/*'
+    severity_threshold: medium
+  checkov:
+    args:
+    - -o
+    - json
+    enabled: true
+    exclude_patterns:
+    - '*/test*'
+    severity_threshold: medium
+  safety:
+    args:
+    - --json
+    enabled: true
+    exclude_patterns: []
+    severity_threshold: medium
+  semgrep:
+    args:
+    - --config=auto
+    - --json
+    enabled: true
+    exclude_patterns:
+    - '*/test*'
+    - '*/node_modules/*'
+    severity_threshold: medium
+  trufflehog:
+    args:
+    - --json
+    enabled: true
+    exclude_patterns: []
+    severity_threshold: medium
+target_path: .
+use_docker: true

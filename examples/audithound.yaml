@@ -1,0 +1,66 @@
+# AuditHound Configuration File Example
+# Place this file in your project root or specify with --config flag
+
+# Scanner configurations
+trufflehog:
+  enabled: true
+  docker_image: "trufflesecurity/trufflehog:latest"
+  command_args: ["filesystem", "--json", "--only-verified"]
+  timeout: 300
+  custom_flags:
+    network_mode: "none"
+    memory_limit: "1g"
+
+semgrep:
+  enabled: true
+  docker_image: "returntocorp/semgrep:latest"
+  command_args: ["--json", "--config=auto", "--severity=ERROR"]
+  timeout: 600
+  custom_flags:
+    network_mode: "bridge"
+    memory_limit: "2g"
+
+bandit:
+  enabled: true
+  docker_image: "secfigo/bandit:latest"
+  command_args: ["-f", "json", "-r", "-ll"]
+  timeout: 300
+  custom_flags:
+    network_mode: "none"
+    memory_limit: "512m"
+
+safety:
+  enabled: true
+  docker_image: "pyupio/safety:latest"
+  command_args: ["check", "--json", "--full-report"]
+  timeout: 300
+  custom_flags:
+    network_mode: "bridge"  # Needs network for vulnerability DB updates
+    memory_limit: "512m"
+
+checkov:
+  enabled: true
+  docker_image: "bridgecrew/checkov:latest"
+  command_args: ["--framework", "terraform,kubernetes,dockerfile", "--output", "json"]
+  timeout: 600
+  custom_flags:
+    network_mode: "none"
+    memory_limit: "1g"
+
+# General settings
+parallel_scans: true
+max_workers: 4
+temp_dir: "/tmp/audithound"
+
+# Docker settings
+docker_enabled: true
+docker_network: "bridge"
+docker_memory_limit: "2g"
+
+# Reporting configuration
+reporting:
+  format: "json"
+  output_dir: "./audit-reports"
+  include_raw_output: true
+  severity_levels: ["critical", "high", "medium", "low", "info"]
+  export_formats: ["json", "csv", "html"]
