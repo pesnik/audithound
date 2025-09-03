@@ -583,7 +583,7 @@ class ConfigurationScreen(Widget):
         self.logger.info("Starting configuration reset operation")
         try:
             self.logger.debug("Creating default configuration")
-            from ..core.config import Config
+            from ...core.config import Config
             default_config = Config.default()
             
             from ..state.actions import Action, ActionType

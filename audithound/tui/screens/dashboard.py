@@ -14,17 +14,86 @@ from ..state.events import EventType
 class DashboardScreen(BaseComponent):
     """Main dashboard showing overview and quick actions."""
     
+    DEFAULT_CSS = """
+    DashboardScreen {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+        padding: 1;
+        display: block;
+    }
+    
+    #dashboard-main {
+        height: auto;
+        min-height: 20;
+        width: 100%;
+    }
+    
+    DashboardScreen Static {
+        color: #ffffff;
+        margin: 0 0 1 0;
+    }
+    
+    DashboardScreen Button {
+        margin: 0 0 1 0;
+        width: 100%;
+    }
+    
+    .dashboard-panel {
+        background: #333333;
+        color: #ffffff;
+        border: solid #666666;
+        padding: 1;
+        margin: 1 0;
+        min-height: 5;
+    }
+    
+    .quick-actions {
+        margin: 1 0;
+        height: 3;
+        width: 100%;
+    }
+    
+    .quick-actions Button {
+        margin: 0 1;
+        width: 1fr;
+        min-width: 15;
+    }
+    
+    .activity-panel {
+        background: #2d2d2d;
+        color: #ffffff;
+        border: solid #666666;
+        padding: 1;
+        margin: 1 0;
+        min-height: 8;
+    }
+    """
+    
     def __init__(self, store, **kwargs):
         super().__init__(store, component_id="dashboard", **kwargs)
     
     def compose(self) -> ComposeResult:
-        # Dashboard content with white text
-        yield Static("🎯 Target: /Users/r_hasan/Development/audithound")
-        yield Static("🔍 Status: Ready to scan")  
-        yield Button("🚀 Start Scan", variant="primary", id="quick-scan")
-        yield Button("📊 View Results", id="quick-results")
-        yield Button("⚙️ Configure", id="quick-config")
-        yield Static("📈 Recent Activity: No recent scans")
+        yield Vertical(
+            # Target information panel
+            Static("", id="target-info", classes="dashboard-panel"),
+            
+            # Scan status panel  
+            Static("", id="scan-status", classes="dashboard-panel"),
+            
+            # Quick actions
+            Horizontal(
+                Button("🚀 Start Scan", variant="primary", id="quick-scan"),
+                Button("📊 View Results", id="quick-results"),
+                Button("⚙️ Configure", id="quick-config"),
+                classes="quick-actions"
+            ),
+            
+            # Recent activity panel
+            Static("", id="recent-activity", classes="activity-panel"),
+            
+            id="dashboard-main"
+        )
     
     def _setup_event_listeners(self) -> None:
         """Setup dashboard event listeners."""
@@ -35,7 +104,45 @@ class DashboardScreen(BaseComponent):
     
     def on_component_mounted(self) -> None:
         """Initialize dashboard."""
+        self._initialize_panels()
         self._update_dashboard()
+    
+    def _initialize_panels(self) -> None:
+        """Initialize dashboard panels with default content."""
+        try:
+            # Initialize target info panel
+            target_widget = self.query_one("#target-info", Static)
+            state = self.store.get_state()
+            
+            target_text = f"""
+🎯 Scan Target
+Path: {getattr(state, 'scan_target', 'Not set')}
+Tools: {len(getattr(state, 'scan_tools', []))} configured
+Config: {'✅ Loaded' if getattr(state, 'config', None) else '❌ Default'}
+            """
+            
+            target_widget.update(Panel(target_text.strip(), title="Target Info", border_style="blue"))
+            
+            # Initialize scan status panel
+            status_widget = self.query_one("#scan-status", Static)
+            status_text = """
+📊 Scan Status: Ready
+Last scan: Never
+Status: Waiting for scan
+Progress: Press 'Start Scan'
+            """
+            status_widget.update(Panel(status_text.strip(), title="Scan Status", border_style="blue"))
+            
+            # Initialize activity panel
+            activity_widget = self.query_one("#recent-activity", Static)
+            activity_widget.update(Panel(
+                "No recent scans. Start your first scan to see activity here.",
+                title="Recent Activity",
+                border_style="dim"
+            ))
+            
+        except Exception as e:
+            self.logger.error(f"Error initializing panels: {e}")
     
     def on_state_changed(self, new_state, old_state) -> None:
         """Handle state changes."""

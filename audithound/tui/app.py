@@ -212,17 +212,11 @@ class AuditHoundTUI(App):
         
         # Main content with tabs
         with TabbedContent(initial="dashboard", id="main-tabs"):
-            # Dashboard Tab - working content
+            # Dashboard Tab
             with TabPane("🏠 Dashboard", id="dashboard"):
-                yield Static("🎯 Target: /Users/r_hasan/Development/audithound")
-                yield Static("🔍 Status: Ready to scan")
-                yield Static("")  # spacer
-                yield Button("🚀 Start Scan", variant="primary", id="start-scan-btn")
-                yield Button("📊 View Results", id="view-results-btn")
-                yield Button("⚙️ Configure", id="configure-btn")
-                yield Static("")  # spacer  
-                yield Static("📈 Recent Activity:")
-                yield Static("No recent scans. Click 'Start Scan' to begin.")
+                if not self._dashboard_screen:
+                    self._dashboard_screen = DashboardScreen(self.store)
+                yield self._dashboard_screen
             
             # Results Tab
             with TabPane("📊 Results", id="results"):
@@ -478,6 +472,29 @@ class AuditHoundTUI(App):
         
         except Exception as e:
             self.logger.error(f"Error changing tab to {tab_id}: {e}")
+    
+    # Button event handling
+    
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button press events from all screens."""
+        button_id = event.button.id
+        self.logger.info(f"Button pressed: {button_id}")
+        
+        # Dashboard quick actions
+        if button_id == "quick-scan":
+            self.action_start_scan()
+        elif button_id == "quick-results":
+            self.action_focus_results()
+        elif button_id == "quick-config":
+            self.action_focus_configuration()
+        
+        # Configuration actions (handled by ConfigurationScreen, but app-level fallback)
+        elif button_id == "save-config-btn":
+            self.logger.debug("Save configuration button pressed at app level")
+        
+        # Other button handlers would go here
+        else:
+            self.logger.debug(f"Unhandled button press: {button_id}")
     
     # Service integration
     
