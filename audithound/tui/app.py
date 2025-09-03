@@ -101,37 +101,89 @@ class AuditHoundTUI(App):
     
     def compose(self) -> ComposeResult:
         """Create the main TUI layout."""
-        # Add basic theme CSS
+        # Add theme CSS - use App selector to ensure it applies
         self.CSS = """
-        /* Dark theme (default) */
-        .dark-theme {
+        /* Default dark theme */
+        App {
             background: #1e1e1e;
             color: #ffffff;
         }
         
-        /* Light theme */
-        .light-theme {
-            background: #ffffff;
-            color: #000000;
+        /* Light theme overrides */
+        App.light-theme {
+            background: #ffffff !important;
+            color: #000000 !important;
         }
         
-        .light-theme Header {
-            background: #f0f0f0;
-            color: #000000;
+        App.light-theme Header {
+            background: #e8e8e8 !important;
+            color: #000000 !important;
         }
         
-        .light-theme Footer {
-            background: #f0f0f0;
-            color: #000000;
+        App.light-theme Footer {
+            background: #e8e8e8 !important;
+            color: #000000 !important;
         }
         
-        .light-theme Button {
-            background: #e0e0e0;
-            color: #000000;
+        App.light-theme Static {
+            color: #000000 !important;
         }
         
-        .light-theme Static {
-            color: #000000;
+        App.light-theme Button {
+            background: #d0d0d0 !important;
+            color: #000000 !important;
+        }
+        
+        App.light-theme TabbedContent {
+            background: #f8f8f8 !important;
+        }
+        
+        App.light-theme TabPane {
+            background: #ffffff !important;
+        }
+        
+        /* Make dashboard panels visible */
+        .summary-panel {
+            background: #2a2a2a;
+            border: solid #555;
+            padding: 1;
+            margin: 1;
+        }
+        
+        App.light-theme .summary-panel {
+            background: #f0f0f0 !important;
+            border: solid #ccc !important;
+        }
+        
+        .section-title {
+            background: #444;
+            color: #fff;
+            padding: 1;
+            margin: 1 0;
+            text-style: bold;
+        }
+        
+        App.light-theme .section-title {
+            background: #ddd !important;
+            color: #000 !important;
+        }
+        
+        .activity-panel {
+            background: #2a2a2a;
+            border: solid #555;
+            padding: 1;
+            margin: 1;
+            min-height: 5;
+        }
+        
+        App.light-theme .activity-panel {
+            background: #f8f8f8 !important;
+            border: solid #ccc !important;
+        }
+        
+        /* Simple layout */
+        TabPane {
+            padding: 1;
         }
         """
         
@@ -281,10 +333,16 @@ class AuditHoundTUI(App):
         # Update the actual UI tab
         try:
             tabs = self.query_one("#main-tabs", TabbedContent)
+            self.logger.debug(f"Current active tab: {tabs.active}, requested: {new_tab}")
             if tabs.active != new_tab:
                 tabs.active = new_tab
+                self.logger.info(f"Successfully changed tab to {new_tab}")
+            else:
+                self.logger.debug(f"Tab {new_tab} was already active")
         except Exception as e:
             self.logger.error(f"Error updating UI tab to {new_tab}: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
     
     def _on_theme_changed(self, new_theme) -> None:
         """Handle theme changes from the theme manager (legacy)."""

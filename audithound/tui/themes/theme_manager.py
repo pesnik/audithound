@@ -35,7 +35,8 @@ class ThemeManager:
     
     def _setup_event_listeners(self) -> None:
         """Setup event listeners for theme management."""
-        self.store.listen_to_event(EventType.THEME_CHANGED, self._on_theme_changed)
+        # Disabled to prevent infinite loops
+        # self.store.listen_to_event(EventType.THEME_CHANGED, self._on_theme_changed)
         self.store.listen_to_event(EventType.CONFIG_CHANGED, self._on_config_changed)
     
     def _on_theme_changed(self, event: Event) -> None:

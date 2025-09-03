@@ -21,8 +21,8 @@ class DashboardScreen(BaseComponent):
         with Vertical():
             # Status overview
             with Horizontal():
-                yield Static("", id="target-info", classes="summary-panel")
-                yield Static("", id="scan-status", classes="summary-panel")
+                yield Static("🎯 Target: Ready to scan", id="target-info", classes="summary-panel")
+                yield Static("🔍 Status: No scan running", id="scan-status", classes="summary-panel")
             
             # Quick actions
             with Horizontal():
@@ -35,7 +35,7 @@ class DashboardScreen(BaseComponent):
             
             # Recent activity
             yield Static("📈 Recent Activity", classes="section-title")
-            yield Static("", id="recent-activity", classes="activity-panel")
+            yield Static("No recent scans. Start a scan to see activity here.", id="recent-activity", classes="activity-panel")
     
     def _setup_event_listeners(self) -> None:
         """Setup dashboard event listeners."""
